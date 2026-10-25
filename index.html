@@ -154,6 +154,13 @@ ul.points li::marker { color: var(--accent); }
 .job-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 20px; flex-wrap: wrap; }
 .job-role { color: var(--accent); font-weight: 500; margin: 4px 0 0; }
 
+.job-intro { color: var(--muted); margin: 14px 0 0; max-width: 65ch; }
+.sub { font-size: 1rem; margin: 26px 0 0; }
+.sub + ul.points { margin-top: 10px; }
+.job-chips { margin-top: 24px; }
+.about p { margin: 0 0 14px; max-width: 65ch; color: var(--muted); }
+.about p:last-child { margin-bottom: 0; }
+
 /* Projects */
 .projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 .card {
@@ -224,6 +231,7 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       <a href="#experience">Experience</a>
       <a href="#projects">Projects</a>
       <a href="#skills">Skills</a>
+      <a href="#about">About</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -235,11 +243,11 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       <p class="lede">
         Computer Science student at <strong>Fordham University</strong> with a minor in Cybersecurity.
         I build backends with security designed in from day one: authentication, per-user data isolation,
-        and cloud infrastructure that is ready to deploy.
+        and cloud infrastructure that is ready to deploy. Graduating May 2027.
       </p>
       <div class="actions">
         <a class="btn primary" href="https://www.linkedin.com/in/Soowlih-Compaore" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5c0-1.2-.02-2.73-1.66-2.73-1.67 0-1.92 1.3-1.92 2.64V21h-4z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.8v1.6h.06c.53-1 1.830-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5c0-1.2-.02-2.73-1.66-2.73-1.67 0-1.92 1.3-1.92 2.640V21h-4z"/></svg>
           LinkedIn
         </a>
         <a class="btn" href="https://github.com/SOOWLIHH" target="_blank" rel="noopener">
@@ -254,134 +262,10 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       <div class="log-head"><span>access.log</span><span>Bronx, NY</span></div>
       <div class="log-body">
         <div class="row"><span class="m">GET</span><span class="p">/education</span><span class="s ok">200</span><span class="d">B.S. Computer Science, Fordham · May 2027</span></div>
-        <div class="row"><span class="m">POST</span><span class="p">/internships/ibeta</span><span class="s ok">201</span><span class="d">AI Systems &amp; Cloud Infrastructure Lead Intern</span></div>
+        <div class="row"><span class="m">POST</span><span class="p">/internships/ibeta</span><span class="s ok">201</span><span class="d">Cloud Infrastructure Lead Intern: auth and SOS alerts</span></div>
         <div class="row"><span class="m">GET</span><span class="p">/awards/ramhack-2026</span><span class="s ok">200</span><span class="d">Best in Design, 20+ teams, built in 24 hours</span></div>
         <div class="row"><span class="m">PUT</span><span class="p">/transactions/:id</span><span class="s no">403</span><span class="d">Blocked: not your data. SpendSmart checks ownership on every write.</span></div>
         <div class="row"><span class="m">GET</span><span class="p">/certs/aws-ccp</span><span class="s ok">202</span><span class="d">AWS Certified Cloud Practitioner, in progress</span></div>
       </div>
     </div>
   </section>
-
-  <section class="block" id="experience">
-    <p class="label">Experience</p>
-    <div>
-      <div class="job-head">
-        <h2>The Immersive Black Travel Experience</h2>
-        <span class="meta">Jul 2026 – Present · Remote</span>
-      </div>
-      <p class="job-role">AI Systems &amp; Cloud Infrastructure Lead Intern</p>
-      <ul class="points">
-        <li>Own the authentication architecture for IBETA, a safety-focused travel platform: registration, login, password reset and session management.</li>
-        <li>Architect the cloud and backend infrastructure for a real-time alert and notification system, built for security, scale and reliable deployment.</li>
-        <li>Align backend, data, frontend and mobile engineers on infrastructure and security standards, and write the team's handoff documentation.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="block" id="projects">
-    <p class="label">Projects</p>
-    <div class="projects">
-      <article class="card">
-        <div class="top-line"><h3>SpendSmart</h3><span class="meta">2025 – Present</span></div>
-        <p>A full-stack expense tracker where every query is scoped to the signed-in user, with ownership checked on each read, update and delete.</p>
-        <ul class="points">
-          <li>JWT auth with refresh tokens in HTTP-only cookies</li>
-          <li>Single-use, expiring password-reset links</li>
-          <li>Per-endpoint rate limiting</li>
-        </ul>
-        <div class="chips"><span class="chip">React</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MongoDB</span><span class="chip">Passport.js</span><span class="chip">Jest</span><span class="chip">GitHub Actions</span></div>
-        <div class="result"><b>Tested:</b> integration tests run on every push and prove one user can't read or change another's transactions.</div>
-      </article>
-
-      <article class="card">
-        <div class="top-line"><h3>PawPath</h3><span class="award">Best in Design · RamHack 2026</span></div>
-        <p>An AI dog-walk planner built in under 24 hours. I built the Express data layer for dog profiles on Supabase, including photo uploads, and secured every protected endpoint with Supabase Auth and Google OAuth.</p>
-        <div class="chips"><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">PostgreSQL</span><span class="chip">Supabase</span><span class="chip">Gemini</span></div>
-        <div class="result"><b>Result:</b> won Best in Design out of 20+ teams.</div>
-      </article>
-
-      <article class="card">
-        <div class="top-line"><h3>AI Chatbot Agent API</h3><span class="meta">Summer 2025</span></div>
-        <p>A FastAPI backend serving a LangChain agent powered by Google Gemini. The agent calls tools for location and weather lookups and remembers the conversation through LangGraph checkpointing.</p>
-        <div class="chips"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">LangChain</span><span class="chip">LangGraph</span><span class="chip">Gemini API</span></div>
-        <div class="result"><b>Design:</b> environment-based config lets the model provider be swapped without code changes.</div>
-      </article>
-
-      <article class="card">
-        <div class="top-line"><h3>House Price Prediction</h3><span class="meta">Oct 2026</span></div>
-        <p>A model that predicts sale prices for 1,460 Iowa homes from 79 property features, framed around helping an investment firm spot underpriced listings.</p>
-        <div class="chips"><span class="chip">Python</span><span class="chip">pandas</span><span class="chip">scikit-learn</span><span class="chip">Kaggle</span></div>
-        <div class="result"><b>−25% error:</b> validation MAE fell from $31,476 to $23,718 by moving from a decision tree to a random forest.</div>
-      </article>
-    </div>
-  </section>
-
-  <section class="block" id="skills">
-    <p class="label">Skills</p>
-    <div class="skills">
-      <div>
-        <h3>Languages &amp; frameworks</h3>
-        <div class="chips"><span class="chip">Python</span><span class="chip">JavaScript</span><span class="chip">C++</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">pandas</span><span class="chip">scikit-learn</span></div>
-      </div>
-      <div>
-        <h3>Cloud &amp; data</h3>
-        <div class="chips"><span class="chip">AWS</span><span class="chip">Docker</span><span class="chip">GitHub Actions</span><span class="chip">PostgreSQL</span><span class="chip">MongoDB</span><span class="chip">DynamoDB</span><span class="chip">SQL</span></div>
-      </div>
-      <div>
-        <h3>Security &amp; tools</h3>
-        <div class="chips"><span class="chip">JWT</span><span class="chip">Passport.js</span><span class="chip">bcrypt</span><span class="chip">IAM</span><span class="chip">Rate limiting</span><span class="chip">Supabase</span><span class="chip">Git</span><span class="chip">Postman</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="education">
-    <p class="label">Education &amp; leadership</p>
-    <div class="edu">
-      <div>
-        <div class="job-head"><h3>Fordham University, Lincoln Center</h3><span class="meta">Expected May 2027</span></div>
-        <p>B.S. Computer Science, minor in Cybersecurity. CSTEP Scholar. Coursework includes Data Structures &amp; Algorithms, Software Engineering, Data Communication, Discrete Structures I &amp; II, and AI Engineering through CodePath.</p>
-      </div>
-      <div>
-        <div class="job-head"><h3>Group Leader, Goddard Riverside</h3><span class="meta">Mar 2024 – Present</span></div>
-        <p>Lead weekly STEM and art sessions for 10–20 students, with computational-thinking challenges scaled to each student's level. Coordinate logistics with staff and help resolve conflicts in the group.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact" id="contact">
-    <h2>Looking for a backend, cloud or security internship.</h2>
-    <p>I'm open to summer 2027 internships and new-grad roles. The fastest way to reach me is email.</p>
-    <div class="email">
-      <span id="email-addr">scompaore1@fordham.edu</span>
-      <button class="copy" id="copy-email" type="button">Copy</button>
-    </div>
-    <div class="actions">
-      <a class="btn" href="https://www.linkedin.com/in/Soowlih-Compaore" target="_blank" rel="noopener">LinkedIn</a>
-      <a class="btn" href="https://github.com/SOOWLIHH" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </section>
-
-  <footer>© 2026 Soowlih Compaore · Bronx, NY</footer>
-</div>
-
-<script>
-  (function () {
-    var btn = document.getElementById('copy-email');
-    var addr = document.getElementById('email-addr');
-    btn.addEventListener('click', function () {
-      function selectText() {
-        var r = document.createRange(); r.selectNodeContents(addr);
-        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
-        btn.textContent = 'Selected';
-      }
-      try {
-        navigator.clipboard.writeText(addr.textContent).then(function () {
-          btn.textContent = 'Copied';
-          setTimeout(function () { btn.textContent = 'Copy'; }, 1800);
-        }, selectText);
-      } catch (e) { selectText(); }
-    });
-  })();
-</script>
-</body>
-</html>
