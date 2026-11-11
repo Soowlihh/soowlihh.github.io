@@ -5,19 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Soowlih Compaore</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Soowlih Compaore — Computer Science student at Fordham University building secure backends, authentication systems and cloud infrastructure.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://soowlihh.github.io/">
-<meta property="og:title" content="Soowlih Compaore | Backend, Cloud &amp; Security">
-<meta property="og:description" content="Fordham CS '27. I build secure backends: authentication, SOS alert systems and cloud infrastructure. Looking for new-grad roles starting May 2027.">
-<meta property="og:image" content="https://soowlihh.github.io/og-image.png">
-<meta property="og:image:width" content="2400">
-<meta property="og:image:height" content="1254">
-<meta property="og:image:alt" content="Soowlih Compaore's portfolio: backend, cloud and security work">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Soowlih Compaore: backend and security engineer in the making. Born in the Bronx, raised between New York and Burkina Faso, studying Computer Science at Fordham.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: one 1040px column. Hero pairs the intro with an "access log" of real milestones;
    sections below are a label rail on the left and content on the right, stacking on phones. */
@@ -29,8 +20,6 @@
   --line: #dfe1e6;
   --accent: #860038;      /* Fordham maroon */
   --accent-soft: #f6e6ec;
-  --ok: #1d7a4f;
-  --deny: #b4232f;
   --log-bg: #1b1d22;
   --log-fg: #d9dce3;
   --log-dim: #8a90a0;
@@ -41,14 +30,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #111317; --surface: #191c21; --ink: #eceef2; --muted: #a0a6b3; --line: #2b2f37;
-    --accent: #e27a9a; --accent-soft: #3a1e29; --ok: #5cc995; --deny: #f07b84;
+    --accent: #e27a9a; --accent-soft: #3a1e29;
     --log-bg: #0b0c0f; --log-fg: #d9dce3; --log-dim: #7d8394;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #111317; --surface: #191c21; --ink: #eceef2; --muted: #a0a6b3; --line: #2b2f37;
-  --accent: #e27a9a; --accent-soft: #3a1e29; --ok: #5cc995; --deny: #f07b84;
+  --accent: #e27a9a; --accent-soft: #3a1e29;
   --log-bg: #0b0c0f; --log-fg: #d9dce3; --log-dim: #7d8394;
   color-scheme: dark;
 }
@@ -96,11 +85,6 @@ h1 {
   font-family: var(--font-display); font-weight: 800;
   font-size: clamp(2.6rem, 6vw, 4.4rem); line-height: 0.98; letter-spacing: -0.03em;
   margin: 0 0 22px; text-wrap: balance;
-}
-/* Headshot */
-.avatar {
-  width: 96px; height: 96px; border-radius: 50%; object-fit: cover; display: block;
-  margin: 0 0 22px; border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line);
 }
 .lede { font-size: 1.15rem; color: var(--muted); max-width: 34rem; margin: 0 0 28px; }
 .lede strong { color: var(--ink); font-weight: 600; }
@@ -164,16 +148,23 @@ h3 {
 ul.points { margin: 14px 0 0; padding-left: 1.1em; display: grid; gap: 8px; max-width: 65ch; }
 ul.points li::marker { color: var(--accent); }
 
+/* About */
+.about { display: grid; grid-template-columns: 1fr 230px; gap: 40px; align-items: start; }
+.about > * { min-width: 0; }
+.about h2 { font-size: clamp(1.7rem, 3.4vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 18px; }
+.prose p { margin: 0 0 16px; max-width: 62ch; font-size: 1.05rem; }
+.prose p:last-child { margin-bottom: 0; }
+.facts {
+  margin: 0; display: grid; gap: 14px;
+  border-left: 2px solid var(--accent); padding-left: 18px;
+}
+.facts div { display: grid; gap: 1px; }
+.facts dt { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; font-weight: 500; }
+
 /* Experience */
 .job-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 20px; flex-wrap: wrap; }
 .job-role { color: var(--accent); font-weight: 500; margin: 4px 0 0; }
-
-.job-intro { color: var(--muted); margin: 14px 0 0; max-width: 65ch; }
-.sub { font-size: 1rem; margin: 26px 0 0; }
-.sub + ul.points { margin-top: 10px; }
-.job-chips { margin-top: 24px; }
-.about p { margin: 0 0 14px; max-width: 65ch; color: var(--muted); }
-.about p:last-child { margin-bottom: 0; }
 
 /* Projects */
 .projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -183,25 +174,35 @@ ul.points li::marker { color: var(--accent); }
 }
 .card .top-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .card p { margin: 0; color: var(--muted); }
+.card .why { color: var(--ink); }
 .card .result {
-  font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink);
+  font-size: 0.92rem; color: var(--ink);
   border-top: 1px dashed var(--line); padding-top: 12px; margin-top: auto;
 }
-.card .result b { color: var(--accent); font-weight: 500; }
+.card .result b { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 500; letter-spacing: 0.03em; display: block; margin-bottom: 2px; }
 .award {
   font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em;
   background: var(--accent-soft); color: var(--accent); padding: 3px 9px; border-radius: 999px;
 }
-.card-link {
-  font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent);
-  text-decoration: none; align-self: flex-start;
-}
-.card-link:hover { text-decoration: underline; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted);
   border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px;
 }
+
+/* Now */
+.now-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; max-width: 65ch; }
+.now-list li { display: grid; grid-template-columns: 110px 1fr; gap: 16px; align-items: baseline; }
+.tag {
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Beyond code */
+.beyond { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 36px; margin-top: 22px; }
+.beyond > div { min-width: 0; }
+.beyond h3 { font-size: 1.1rem; margin-bottom: 6px; }
+.beyond p { margin: 0; color: var(--muted); max-width: 46ch; }
 
 /* Skills */
 .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
@@ -213,8 +214,8 @@ ul.points li::marker { color: var(--accent); }
 
 /* Contact */
 .contact { padding-block: 72px 56px; border-top: 1px solid var(--line); }
-.contact h2 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.025em; max-width: 20ch; }
-.contact p { color: var(--muted); max-width: 52ch; margin: 14px 0 26px; }
+.contact h2 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.025em; max-width: 22ch; }
+.contact p { color: var(--muted); max-width: 56ch; margin: 14px 0 26px; font-size: 1.05rem; }
 .email {
   display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
   font-family: var(--font-mono); font-size: 1rem;
@@ -232,12 +233,14 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 24px 56px; }
   section.block { grid-template-columns: 1fr; gap: 18px; padding-block: 44px; }
+  .about { grid-template-columns: 1fr; gap: 28px; }
   .projects { grid-template-columns: 1fr; }
   .skills { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 520px) {
   .top nav { display: none; }
-  .skills { grid-template-columns: 1fr; }
+  .skills, .beyond { grid-template-columns: 1fr; }
+  .now-list li { grid-template-columns: 1fr; gap: 2px; }
   .card { padding: 20px; }
 }
 </style>
@@ -247,23 +250,21 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
   <header class="top">
     <span>soowlih.compaore</span>
     <nav aria-label="Sections">
-      <a href="#experience">Experience</a>
-      <a href="#projects">Projects</a>
-      <a href="#skills">Skills</a>
       <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#now">Now</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
 
   <section class="hero">
     <div>
-      <img class="avatar" src="headshot.jpg" alt="Soowlih Compaore" width="96" height="96">
       <p class="eyebrow">Backend · Cloud · Security</p>
       <h1>Soowlih Compaore</h1>
       <p class="lede">
-        Computer Science student at <strong>Fordham University</strong> with a minor in Cybersecurity.
-        I build backends with security designed in from day one: authentication, per-user data isolation,
-        and cloud infrastructure that is ready to deploy. Graduating May 2027.
+        I build the part of the app you never see: the logins, the data and the servers that keep everything running.
+        Born in the Bronx, raised between New York and Burkina Faso, and now studying
+        <strong>Computer Science at Fordham</strong>.
       </p>
       <div class="actions">
         <a class="btn primary" href="https://www.linkedin.com/in/Soowlih-Compaore" target="_blank" rel="noopener">
@@ -274,19 +275,39 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.06.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
           GitHub
         </a>
-        <a class="btn" href="#contact">Get in touch</a>
+        <a class="btn" href="#about">Get to know me</a>
       </div>
     </div>
 
-    <div class="log" role="img" aria-label="A server access log listing highlights: Fordham CS class of 2027, cloud and AI intern at IBETA, Best in Design at RamHack 2026, and a blocked request showing SpendSmart's per-user data isolation.">
+    <div class="log" role="img" aria-label="A server access log listing highlights: born in the Bronx with roots in Burkina Faso, Fordham CS class of 2027, cloud and AI intern at IBETA, Best in Design at RamHack 2026, and a blocked request showing SpendSmart's per-user data isolation.">
       <div class="log-head"><span>access.log</span><span>Bronx, NY</span></div>
       <div class="log-body">
+        <div class="row"><span class="m">GET</span><span class="p">/origin</span><span class="s ok">200</span><span class="d">Bronx → Burkina Faso → back to the Bronx</span></div>
         <div class="row"><span class="m">GET</span><span class="p">/education</span><span class="s ok">200</span><span class="d">B.S. Computer Science, Fordham · May 2027</span></div>
-        <div class="row"><span class="m">POST</span><span class="p">/internships/ibeta</span><span class="s ok">201</span><span class="d">Cloud Infrastructure Lead Intern: auth and SOS alerts</span></div>
+        <div class="row"><span class="m">POST</span><span class="p">/internships/ibeta</span><span class="s ok">201</span><span class="d">AI Systems &amp; Cloud Infrastructure Lead Intern</span></div>
         <div class="row"><span class="m">GET</span><span class="p">/awards/ramhack-2026</span><span class="s ok">200</span><span class="d">Best in Design, 20+ teams, built in 24 hours</span></div>
         <div class="row"><span class="m">PUT</span><span class="p">/transactions/:id</span><span class="s no">403</span><span class="d">Blocked: not your data. SpendSmart checks ownership on every write.</span></div>
-        <div class="row"><span class="m">GET</span><span class="p">/certs/aws-ccp</span><span class="s ok">202</span><span class="d">AWS Certified Cloud Practitioner, in progress</span></div>
       </div>
+    </div>
+  </section>
+
+  <section class="block" id="about">
+    <p class="label">About me</p>
+    <div class="about">
+      <div class="prose">
+        <h2>It started with fixing the family TV.</h2>
+        <p>Before I wrote a line of code, I was the one who figured out why the computer was slow or why the TV wouldn't connect. Nobody asked me to. I just liked tracking down what was broken until it worked again. Computer science was where that habit led.</p>
+        <p>I'm drawn to the backend because it's the engineering. The frontend is what people look at. The backend decides who can log in, whose data belongs to whom, and whether the app stays up when it matters. You don't see it, but every app depends on it, and that's the part I want to be great at.</p>
+        <p>I was born in the Bronx, spent part of my childhood in the U.S., then moved back to Burkina Faso until college. Growing up between two countries taught me to adapt quickly and figure things out on my own.</p>
+        <p>I'm quiet. I won't be the loudest person in the meeting, but if you hand me something, it gets done, and done better than asked. What I'm proudest of isn't one project. It's everything I've learned by building.</p>
+      </div>
+      <dl class="facts">
+        <div><dt>Home</dt><dd>Bronx, NY</dd></div>
+        <div><dt>Roots</dt><dd>Burkina Faso</dd></div>
+        <div><dt>School</dt><dd>Fordham, Class of 2027</dd></div>
+        <div><dt>Focus</dt><dd>Backend, cloud &amp; security</dd></div>
+        <div><dt>Off the clock</dt><dd>Soccer, the gym, PS5</dd></div>
+      </dl>
     </div>
   </section>
 
@@ -298,40 +319,11 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
         <span class="meta">Jul 2026 – Present · Remote</span>
       </div>
       <p class="job-role">AI Systems &amp; Cloud Infrastructure Lead Intern</p>
-      <p class="job-intro">IBETA is a travel safety app. I own the backend pieces that protect travelers' accounts and get help to them fast when something goes wrong.</p>
-
-      <h3 class="sub">Authentication and account security</h3>
       <ul class="points">
-        <li>Built on Firebase Authentication: sign-up, login, password reset and sessions.</li>
-        <li>Rate limits on failed logins, password resets and SOS activations.</li>
-        <li>Sensitive actions require a recent sign-in, and a logout or password reset ends sessions on every device.</li>
-        <li>Login and reset never reveal whether an email is registered.</li>
-        <li>The user ID always comes from the verified token, so a traveler can only ever touch her own data.</li>
-        <li>An audit log keeps a security trail without storing emails, passwords or locations.</li>
+        <li>Own the authentication for IBETA, a safety-focused travel app: sign-up, login, password reset and sessions.</li>
+        <li>Design the cloud and backend setup for a real-time alert system that travelers rely on to stay safe.</li>
+        <li>Keep the backend, data, frontend and mobile engineers on the same security standards, and write the docs that hand the work off.</li>
       </ul>
-
-      <h3 class="sub">SOS and safety alerts</h3>
-      <ul class="points">
-        <li>Push notifications through Firebase Cloud Messaging at three priority levels: emergencies like SOS and missed check-ins break through Focus mode on iPhone and retry twice, safety alerts retry once, and reminders don't retry.</li>
-        <li>Emergency contacts usually don't have the app, so they get an email with the traveler's name, the time, a map link to her location, her message and a button to call her.</li>
-        <li>Every contact's result (sent, failed or skipped) is recorded and shown to the traveler, so she can text or call anyone the server couldn't reach. The local emergency number is always one tap away.</li>
-      </ul>
-
-      <h3 class="sub">Infrastructure and scale</h3>
-      <ul class="points">
-        <li>Node.js, TypeScript and Express backend on Google Cloud Run in Docker containers, using keyless credentials so there are no private keys to leak, and API keys kept in Secret Manager.</li>
-        <li>Firebase App Check verifies that requests come from the real IBETA app.</li>
-        <li>Cloud Run adds instances as traffic grows. Notifications go out in batches of 500, dead device tokens are removed automatically, and retries happen only for temporary failures, so a traffic spike doesn't trigger a flood of resends.</li>
-        <li>340+ Jest tests run against the Firebase Emulator on every pull request through GitHub Actions.</li>
-      </ul>
-
-      <h3 class="sub">Working with the team</h3>
-      <ul class="points">
-        <li>Work with the founder on scope, the frontend engineer on screens and flows, and mobile/QA on testing push notifications on real devices.</li>
-        <li>Write the team's handoff documentation so anyone can pick up the backend.</li>
-      </ul>
-
-      <div class="chips job-chips"><span class="chip">Node.js</span><span class="chip">TypeScript</span><span class="chip">Express</span><span class="chip">Firebase Auth</span><span class="chip">Cloud Firestore</span><span class="chip">FCM</span><span class="chip">App Check</span><span class="chip">Google Cloud Run</span><span class="chip">Docker</span><span class="chip">Secret Manager</span><span class="chip">Jest</span><span class="chip">GitHub Actions</span></div>
     </div>
   </section>
 
@@ -340,48 +332,74 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
     <div class="projects">
       <article class="card">
         <div class="top-line"><h3>SpendSmart</h3><span class="meta">2025 – Present</span></div>
-        <p>A full-stack expense tracker where every query is scoped to the signed-in user, with ownership checked on each read, update and delete.</p>
-        <ul class="points">
-          <li>JWT auth with refresh tokens in HTTP-only cookies</li>
-          <li>Single-use, expiring password-reset links</li>
-          <li>Per-endpoint rate limiting</li>
-        </ul>
+        <p class="why">I wanted to learn to build login and data security the right way, so I built an expense tracker around it.</p>
+        <p>Every query is scoped to the signed-in user. Refresh tokens live in HTTP-only cookies, reset links expire after one use, and each endpoint is rate limited.</p>
         <div class="chips"><span class="chip">React</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MongoDB</span><span class="chip">Passport.js</span><span class="chip">Jest</span><span class="chip">GitHub Actions</span></div>
-        <div class="result"><b>Tested:</b> integration tests run on every push and prove one user can't read or change another's transactions.</div>
-        <a class="card-link" href="https://github.com/Soowlihh/Spend-Smart-Expense-Tracker" target="_blank" rel="noopener">View code on GitHub →</a>
+        <div class="result"><b>What I learned</b>Security only counts if you can prove it. Tests run on every push and check that one user can't touch another's data.</div>
       </article>
 
       <article class="card">
         <div class="top-line"><h3>PawPath</h3><span class="award">Best in Design · RamHack 2026</span></div>
-        <p>An AI dog-walk planner built in under 24 hours. I built the Express data layer for dog profiles on Supabase, including photo uploads, and secured every protected endpoint with Supabase Auth and Google OAuth.</p>
+        <p class="why">An AI dog-walk planner, built by a small team in under 24 hours.</p>
+        <p>I built the Express data layer for dog profiles and photo uploads on Supabase, and locked down every private endpoint with Supabase Auth and Google OAuth while teammates built the FastAPI and React sides.</p>
         <div class="chips"><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">PostgreSQL</span><span class="chip">Supabase</span><span class="chip">Gemini</span></div>
-        <div class="result"><b>Result:</b> won Best in Design out of 20+ teams.</div>
-        <a class="card-link" href="https://github.com/Soowlihh/pawpath" target="_blank" rel="noopener">View code on GitHub →</a>
+        <div class="result"><b>What I learned</b>Moving fast as a team works when everyone owns a clear piece. We won Best in Design out of 20+ teams.</div>
       </article>
 
       <article class="card">
         <div class="top-line"><h3>AI Chatbot Agent API</h3><span class="meta">Summer 2025</span></div>
-        <p>A FastAPI backend serving a LangChain agent powered by Google Gemini. The agent calls tools for location and weather lookups and remembers the conversation through LangGraph checkpointing.</p>
+        <p class="why">My first AI agent. I wanted to see how a chatbot uses tools instead of only generating text.</p>
+        <p>A FastAPI backend serves a LangChain agent on Google Gemini. It looks up locations and weather, and remembers the conversation with LangGraph checkpointing.</p>
         <div class="chips"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">LangChain</span><span class="chip">LangGraph</span><span class="chip">Gemini API</span></div>
-        <div class="result"><b>Design:</b> environment-based config lets the model provider be swapped without code changes.</div>
-        <a class="card-link" href="https://github.com/Soowlihh/AI_chatbot" target="_blank" rel="noopener">View code on GitHub →</a>
+        <div class="result"><b>What I learned</b>How agents call tools and keep memory, and how to set things up so the AI provider can be swapped without touching the code.</div>
       </article>
 
       <article class="card">
         <div class="top-line"><h3>House Price Prediction</h3><span class="meta">Oct 2026</span></div>
-        <p>A model that predicts sale prices for 1,460 Iowa homes from 79 property features, framed around helping an investment firm spot underpriced listings. My first score looked almost perfect because I had measured the model on its own training data; testing on unseen homes gave the real number.</p>
+        <p class="why">My first machine learning model, built to help an investment firm spot underpriced homes.</p>
+        <p>It predicts sale prices for 1,460 Iowa homes from 79 features. I explored the data with pandas, then trained and compared models on held-out data.</p>
         <div class="chips"><span class="chip">Python</span><span class="chip">pandas</span><span class="chip">scikit-learn</span><span class="chip">Kaggle</span></div>
-        <div class="result"><b>−25% error:</b> validation MAE fell from $31,476 to $23,718 by moving from a decision tree to a random forest.</div>
-        <a class="card-link" href="https://www.kaggle.com/code/soowlihhousmoul/soowlih-compaore-possible-data-science-project" target="_blank" rel="noopener">View notebook on Kaggle →</a>
+        <div class="result"><b>What I learned</b>The right model matters. Switching to a random forest cut the average error by 25%, from $31,476 to $23,718.</div>
       </article>
+    </div>
+  </section>
 
-      <article class="card">
-        <div class="top-line"><h3>Password Cracker</h3><span class="meta">Spring 2025</span></div>
-        <p>A C++ dictionary-attack tool that hashes candidates from a 1M-entry leaked password list and compares them to a target MD5 hash, using a custom hash table with collision handling and dynamic resizing, plus a log of every attempt.</p>
-        <div class="chips"><span class="chip">C++</span><span class="chip">MD5</span><span class="chip">Hash tables</span></div>
-        <div class="result"><b>Cracked:</b> the target hash after 793,000+ guesses, showing why fast, unsalted hashes are unsafe for passwords.</div>
-        <a class="card-link" href="https://github.com/Soowlihh/Password-Cracker" target="_blank" rel="noopener">View code on GitHub →</a>
-      </article>
+  <section class="block" id="now">
+    <p class="label">Now</p>
+    <div>
+      <h2>Sharpening the tools</h2>
+      <ul class="now-list">
+        <li><span class="tag">Building</span><span>The authentication and real-time alert system for IBETA.</span></li>
+        <li><span class="tag">Studying</span><span>For the AWS Certified Cloud Practitioner exam.</span></li>
+        <li><span class="tag">Looking for</span><span>A backend, cloud or security internship for summer 2027, or a new-grad role.</span></li>
+        <li><span class="tag">Meeting</span><span>Engineers and recruiters. If you work on backend or security, I'd like to hear about it.</span></li>
+      </ul>
+      <p class="meta" style="margin-top:18px">Updated November 2026</p>
+    </div>
+  </section>
+
+  <section class="block" id="beyond">
+    <p class="label">Beyond code</p>
+    <div>
+      <h2>Soccer is my life.</h2>
+      <div class="beyond">
+        <div>
+          <h3>Soccer</h3>
+          <p>I played for years until a knee injury moved me to the sidelines. I still never miss a big game.</p>
+        </div>
+        <div>
+          <h3>The gym</h3>
+          <p>My reset button. Same idea as code: show up consistently and the progress comes.</p>
+        </div>
+        <div>
+          <h3>PS5</h3>
+          <p>F1, basketball, soccer and GTA. Always up for a race or a match.</p>
+        </div>
+        <div>
+          <h3>Sports documentaries</h3>
+          <p>I like seeing how great athletes and teams are built, behind the scenes. Sound familiar?</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -390,11 +408,11 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
     <div class="skills">
       <div>
         <h3>Languages &amp; frameworks</h3>
-        <div class="chips"><span class="chip">Python</span><span class="chip">JavaScript</span><span class="chip">TypeScript</span><span class="chip">C++</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">pandas</span><span class="chip">scikit-learn</span></div>
+        <div class="chips"><span class="chip">Python</span><span class="chip">JavaScript</span><span class="chip">C++</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">pandas</span><span class="chip">scikit-learn</span></div>
       </div>
       <div>
         <h3>Cloud &amp; data</h3>
-        <div class="chips"><span class="chip">Google Cloud Run</span><span class="chip">Firebase</span><span class="chip">Firestore</span><span class="chip">Secret Manager</span><span class="chip">Docker</span><span class="chip">GitHub Actions</span><span class="chip">AWS</span><span class="chip">PostgreSQL</span><span class="chip">MongoDB</span><span class="chip">SQL</span></div>
+        <div class="chips"><span class="chip">AWS</span><span class="chip">Docker</span><span class="chip">GitHub Actions</span><span class="chip">PostgreSQL</span><span class="chip">MongoDB</span><span class="chip">DynamoDB</span><span class="chip">SQL</span></div>
       </div>
       <div>
         <h3>Security &amp; tools</h3>
@@ -404,39 +422,22 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
   </section>
 
   <section class="block" id="education">
-    <p class="label">Education &amp; community</p>
+    <p class="label">Education &amp; leadership</p>
     <div class="edu">
       <div>
         <div class="job-head"><h3>Fordham University, Lincoln Center</h3><span class="meta">Expected May 2027</span></div>
-        <p>B.S. Computer Science, minor in Cybersecurity. CSTEP Scholar and Possible career scholar. Coursework includes Data Structures &amp; Algorithms, Software Engineering, Data Communication, Discrete Structures I &amp; II, and AI Engineering through CodePath.</p>
+        <p>B.S. Computer Science, minor in Cybersecurity. CSTEP Scholar. Coursework includes Data Structures &amp; Algorithms, Software Engineering, Data Communication, Discrete Structures I &amp; II, and AI Engineering through CodePath.</p>
       </div>
       <div>
         <div class="job-head"><h3>Group Leader, Goddard Riverside</h3><span class="meta">Mar 2024 – Present</span></div>
-        <p>Lead weekly STEM and art sessions for 10–20 students, with computational-thinking challenges scaled to each student's level. Coordinate logistics with staff and help resolve conflicts in the group.</p>
+        <p>Every week I lead STEM and art sessions for 10–20 kids, with problem-solving challenges matched to each kid's level. Getting a room of students to think like engineers is its own kind of debugging.</p>
       </div>
-      <div>
-        <div class="job-head"><h3>Math &amp; STEM Tutor, Teach For America</h3><span class="meta">Fall 2026 – Present</span></div>
-        <p>Tutor students in grades 3–8 in math and STEM, building foundational problem-solving skills.</p>
-      </div>
-      <div>
-        <div class="job-head"><h3>Peer Tutor, Knack</h3><span class="meta">Fall 2026 – Present</span></div>
-        <p>Tutor Discrete Structures I for college students, breaking down logic, proofs and problem-solving strategies.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="about">
-    <p class="label">About</p>
-    <div class="about">
-      <p>I'm most drawn to backend, cloud and security work: the parts of an app users never see, but always depend on.</p>
-      <p>Teaching has made me better at explaining technical ideas clearly, whether it's elementary and middle school math or college-level proofs.</p>
-      <p>I'm an introvert, which mostly means I listen closely, think things through before I build and care about getting the details right. When I'm not working, I'm watching or playing soccer, or on my PS5.</p>
     </div>
   </section>
 
   <section class="contact" id="contact">
-    <h2>Looking for a new-grad backend, cloud or security role.</h2>
-    <p>I graduate in May 2027 and I'm looking for full-time roles starting then. The fastest way to reach me is email.</p>
+    <h2>I want to build systems that work, on a team I can grow with.</h2>
+    <p>I'm looking for backend, cloud or security internships for summer 2027 and new-grad roles. If your team needs someone who will quietly get it done and done well, email me.</p>
     <div class="email">
       <span id="email-addr">scompaore1@fordham.edu</span>
       <button class="copy" id="copy-email" type="button">Copy</button>
