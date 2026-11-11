@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one 1040px column. Hero pairs the intro with a working terminal visitors can type into;
-   sections below are a label rail on the left and content on the right, stacking on phones. */
+/* Layout: one 1040px column. Hero pairs the intro with a working terminal; sections below are a
+   label rail plus content. Projects open into a detail panel with a live request pipeline. */
 :root {
   --bg: #f4f5f7;
   --surface: #ffffff;
@@ -20,6 +20,12 @@
   --line: #dfe1e6;
   --accent: #860038;      /* Fordham maroon */
   --accent-soft: #f6e6ec;
+  --good: #1d7a4f;
+  --good-soft: #e3f3ea;
+  --bad: #b4232f;
+  --bad-soft: #fbe5e7;
+  --pitch: #e7efe6;
+  --pitch-line: #c9d8c7;
   --log-bg: #1b1d22;
   --log-fg: #d9dce3;
   --log-dim: #8a90a0;
@@ -34,6 +40,8 @@
   :root:not([data-theme="light"]) {
     --bg: #111317; --surface: #191c21; --ink: #eceef2; --muted: #a0a6b3; --line: #2b2f37;
     --accent: #e27a9a; --accent-soft: #3a1e29;
+    --good: #5cc995; --good-soft: #17301f; --bad: #f07b84; --bad-soft: #3a1c1f;
+    --pitch: #16201a; --pitch-line: #24362a;
     --log-bg: #0b0c0f; --log-fg: #d9dce3; --log-dim: #7d8394;
     color-scheme: dark;
   }
@@ -41,14 +49,18 @@
 :root[data-theme="dark"] {
   --bg: #111317; --surface: #191c21; --ink: #eceef2; --muted: #a0a6b3; --line: #2b2f37;
   --accent: #e27a9a; --accent-soft: #3a1e29;
+  --good: #5cc995; --good-soft: #17301f; --bad: #f07b84; --bad-soft: #3a1c1f;
+  --pitch: #16201a; --pitch-line: #24362a;
   --log-bg: #0b0c0f; --log-fg: #d9dce3; --log-dim: #7d8394;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-padding-top: 16px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
@@ -57,8 +69,11 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color .25s, color .25s;
 }
+img { max-width: 100%; }
 a { color: inherit; }
-a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+a:focus-visible, button:focus-visible, input:focus-visible, canvas:focus-visible, .card:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
+}
 button { font: inherit; color: inherit; }
 
 .wrap {
@@ -68,33 +83,62 @@ button { font: inherit; color: inherit; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
+/* Scroll progress */
+.progress {
+  position: fixed; left: 0; right: 0; top: 0; height: calc(3px + env(safe-area-inset-top, 0px));
+  z-index: 50; pointer-events: none;
+}
+.progress i {
+  position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+  background: var(--accent); transform-origin: left; transform: scaleX(0);
+}
+
 /* Top bar */
 .top {
   display: flex; justify-content: space-between; align-items: center; gap: 16px;
   padding-block: 22px;
   font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted);
 }
-.top-right { display: flex; align-items: center; gap: 18px; }
-.top nav { display: flex; gap: 18px; flex-wrap: wrap; }
+.top-right { display: flex; align-items: center; gap: 10px; }
+.top nav { display: flex; gap: 18px; flex-wrap: wrap; margin-right: 8px; }
 .top nav a { text-decoration: none; }
 .top nav a:hover { color: var(--accent); }
-.theme-btn {
+.pill-btn {
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
   font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);
   background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
+  transition: color .15s, border-color .15s;
 }
-.theme-btn:hover { color: var(--accent); border-color: var(--accent); }
-.theme-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.pill-btn:hover { color: var(--accent); border-color: var(--accent); }
+.pill-btn svg { width: 14px; height: 14px; fill: currentColor; }
+kbd {
+  font-family: var(--font-mono); font-size: 0.7rem; border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 4px; padding: 0 5px; color: var(--muted); background: var(--bg);
+}
 
 /* Hero */
 .hero {
   display: grid; grid-template-columns: 1fr 1.05fr; gap: 48px; align-items: center;
-  padding-block: 40px 72px;
+  padding-block: 32px 72px;
 }
 .hero > * { min-width: 0; }
+.status {
+  display: inline-flex; align-items: center; gap: 9px; margin-bottom: 18px;
+  font-size: 0.85rem; font-weight: 500; text-decoration: none;
+  padding: 6px 13px 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+}
+.status:hover { border-color: var(--good); }
+.pulse { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--good); }
+@media (prefers-reduced-motion: no-preference) {
+  .pulse::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--good);
+    animation: pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse { from { transform: scale(1); opacity: .6; } to { transform: scale(2.8); opacity: 0; } }
+}
 .eyebrow {
   font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--accent); margin: 0 0 14px;
+  color: var(--accent); margin: 0 0 12px;
 }
 h1 {
   font-family: var(--font-display); font-weight: 800;
@@ -105,12 +149,13 @@ h1 {
 .lede strong { color: var(--ink); font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .btn {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
   padding: 11px 18px; border-radius: 999px; font-weight: 500; font-size: 0.95rem;
   text-decoration: none; border: 1px solid var(--line); background: var(--surface);
-  transition: border-color .15s, color .15s;
+  transition: border-color .15s, color .15s, transform .15s;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn:active { transform: scale(.97); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .btn.primary:hover { color: var(--bg); filter: brightness(1.08); }
 .btn svg { width: 16px; height: 16px; fill: currentColor; }
@@ -154,8 +199,9 @@ a.row:hover .p { color: var(--log-hi); }
 .term-input label { color: var(--log-ok); white-space: nowrap; }
 .term-input input {
   flex: 1; min-width: 0; background: transparent; border: 0; outline: 0;
-  color: var(--log-fg); font: inherit; caret-color: var(--log-hi);
+  color: var(--log-fg); font: inherit; font-size: 16px; caret-color: var(--log-hi);
 }
+@media (min-width: 521px) { .term-input input { font-size: inherit; } }
 .term-input input::placeholder { color: var(--log-dim); }
 .term-tips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 14px; }
 .term-tips button {
@@ -222,17 +268,23 @@ ul.points li::marker { color: var(--accent); }
 .filter[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .filter .n { font-family: var(--font-mono); font-size: 0.72rem; opacity: .75; }
 .filter-note { font-size: 0.9rem; color: var(--muted); margin: -6px 0 16px; }
-.filter-note button { cursor: pointer; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.filter-note button, .linkish { cursor: pointer; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 
 /* Projects */
 .projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
   padding: 24px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  cursor: pointer;
   transition: transform .2s, border-color .2s, box-shadow .2s;
 }
+.card:hover { border-color: var(--accent); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 18px 40px -28px rgba(0,0,0,.35); }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -28px rgba(0,0,0,.35); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card.enter { animation: cardIn .35s both; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
 }
 .card .top-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .card p { margin: 0; color: var(--muted); }
@@ -242,6 +294,12 @@ ul.points li::marker { color: var(--accent); }
   border-top: 1px dashed var(--line); padding-top: 12px; margin-top: auto;
 }
 .card .result b { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); font-weight: 500; letter-spacing: 0.03em; display: block; margin-bottom: 2px; }
+.open-btn {
+  align-self: flex-start; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 600; font-size: 0.92rem;
+}
+.open-btn span { transition: transform .2s; }
+.card:hover .open-btn span { transform: translateX(4px); }
 .award {
   font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em;
   background: var(--accent-soft); color: var(--accent); padding: 3px 9px; border-radius: 999px;
@@ -250,10 +308,10 @@ ul.points li::marker { color: var(--accent); }
 .chip {
   font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted);
   border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; background: transparent;
+  cursor: pointer; transition: border-color .15s, color .15s, background-color .15s;
 }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.match { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-button.chip { cursor: pointer; }
-button.chip:hover { border-color: var(--accent); color: var(--accent); }
 .skills-hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 18px; }
 
 /* Now */
@@ -264,11 +322,94 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
   color: var(--accent);
 }
 
-/* Beyond code */
-.beyond { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 36px; margin-top: 22px; }
-.beyond > div { min-width: 0; }
-.beyond h3 { font-size: 1.1rem; margin-bottom: 6px; }
-.beyond p { margin: 0; color: var(--muted); max-width: 46ch; }
+/* Beyond code + keepy-uppy */
+.pitch {
+  position: relative; margin-top: 22px; border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--line); background: var(--pitch);
+}
+.pitch canvas { display: block; width: 100%; height: 260px; touch-action: manipulation; cursor: pointer; }
+.hud {
+  position: absolute; top: 12px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 10px;
+  font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); pointer-events: none;
+}
+.hud b { color: var(--ink); font-size: 1.3rem; font-family: var(--font-display); font-weight: 800; display: block; line-height: 1.1; }
+.hud .right { text-align: right; }
+.game-msg {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  text-align: center; pointer-events: none; width: max-content; max-width: calc(100% - 32px);
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--ink);
+}
+.game-msg small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+.pitch-caption { font-size: 0.85rem; color: var(--muted); margin: 10px 0 0; }
+.beyond { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 28px; }
+.hobby {
+  display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: start; min-width: 0;
+  text-align: left; cursor: pointer; width: 100%;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+  transition: border-color .15s, transform .15s;
+}
+.hobby:hover { border-color: var(--accent); }
+.hobby:active { transform: scale(.99); }
+.h-ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.h-ico svg { width: 22px; height: 22px; }
+.h-txt { min-width: 0; }
+.h-txt b { display: block; font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 2px; }
+.h-txt span { color: var(--muted); font-size: 0.92rem; }
+.h-go { color: var(--accent); font-weight: 600; transition: transform .2s; }
+.hobby:hover .h-go { transform: translateX(4px); }
+
+/* Hobby panels */
+dialog.mini { width: min(480px, calc(100% - 32px)); }
+.viz {
+  border-radius: 12px; background: var(--bg); border: 1px solid var(--line); padding: 18px;
+  display: grid; justify-items: center; gap: 14px;
+}
+.viz svg { width: 100%; height: auto; display: block; }
+.viz-big { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; line-height: 1; letter-spacing: -0.02em; }
+.viz-note { color: var(--muted); font-size: 0.92rem; text-align: center; margin: 0; min-height: 1.5em; }
+.viz-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.viz-row .btn { padding: 8px 14px; font-size: 0.88rem; }
+.btn:disabled { opacity: .45; cursor: default; }
+.hm-line { margin: 0; color: var(--muted); }
+.bar-metal { fill: var(--muted); }
+.plate { fill: var(--accent); }
+.plate.alt { fill: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .plate.new { animation: plateIn .3s cubic-bezier(.2,.9,.3,1.3) both; transform-box: fill-box; transform-origin: center; }
+  @keyframes plateIn { from { transform: scaleY(0); } to { transform: none; } }
+  .mini-ball { animation: bounce 1s cubic-bezier(.5,0,.5,1) infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-38px); } }
+}
+.ps-btns { display: flex; gap: 12px; }
+.ps {
+  width: 54px; height: 54px; border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+  background: var(--surface); border: 2px solid var(--line); transition: transform .12s, border-color .15s;
+}
+.ps svg { width: 24px; height: 24px; }
+.ps:hover { border-color: var(--muted); }
+.ps[aria-pressed="true"] { border-color: var(--accent); transform: scale(1.08); }
+.ps:active { transform: scale(.94); }
+.screen {
+  width: 100%; border-radius: 10px; padding: 16px; background: var(--log-bg); color: var(--log-fg);
+  font-family: var(--font-mono); font-size: 0.8rem;
+}
+.screen b { display: block; font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: #fff; margin: 4px 0 2px; }
+.screen span { color: var(--log-dim); }
+.strip {
+  width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  background: var(--log-bg); border-radius: 8px; padding: 16px 8px;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(255,255,255,.22) 8px 16px),
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(255,255,255,.22) 8px 16px);
+  background-size: 100% 5px, 100% 5px; background-position: 0 5px, 0 calc(100% - 5px); background-repeat: no-repeat;
+}
+.frame {
+  aspect-ratio: 4 / 3; border-radius: 4px; cursor: pointer; border: 2px solid transparent;
+  background: #2a2d35; color: var(--log-fg); font-family: var(--font-mono); font-size: 0.72rem; padding: 4px;
+  transition: border-color .15s, background-color .15s;
+}
+.frame:hover { background: #343844; }
+.frame[aria-pressed="true"] { border-color: var(--log-hi); color: #fff; }
 
 /* Skills */
 .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
@@ -294,26 +435,118 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
   background: var(--accent); color: var(--bg); border: 0; border-radius: 7px; padding: 6px 12px;
 }
 .contact .actions { margin-top: 18px; }
-footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+
+/* Dialogs (project detail + command palette) */
+dialog {
+  border: 1px solid var(--line); border-radius: 16px; padding: 0;
+  background: var(--surface); color: var(--ink);
+  width: min(760px, calc(100% - 32px)); max-height: calc(100% - 48px);
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,.5);
+}
+dialog::backdrop { background: rgba(12,12,16,.55); }
+@media (prefers-reduced-motion: no-preference) {
+  dialog[open] { animation: pop .22s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+}
+.modal-inner { padding: 28px; display: grid; gap: 22px; }
+.modal-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.modal-top h2 { font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; }
+.modal-top p { margin: 6px 0 0; color: var(--muted); max-width: 52ch; }
+.icon-btn {
+  flex: none; cursor: pointer; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--bg); border: 1px solid var(--line); color: var(--muted);
+}
+.icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+.icon-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.modal-section h3 { font-size: 0.78rem; font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.modal-section p { margin: 0; max-width: 62ch; }
+
+.pipeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.step { position: relative; display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding-bottom: 14px; }
+.step:last-child { padding-bottom: 0; }
+.step::before {
+  content: ""; position: absolute; left: 13px; top: 26px; bottom: 0; width: 2px; background: var(--line);
+}
+.step:last-child::before { display: none; }
+.step .dot {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); background: var(--bg);
+  display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted);
+  transition: background-color .2s, border-color .2s, color .2s, transform .2s;
+}
+.step .txt { padding-top: 3px; }
+.step .txt b { font-weight: 600; display: block; line-height: 1.3; }
+.step .txt span { font-size: 0.88rem; color: var(--muted); }
+.step.lit .dot { border-color: var(--accent); background: var(--accent); color: var(--bg); transform: scale(1.08); }
+.step.done .dot { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+.step.deny .dot { border-color: var(--bad); background: var(--bad); color: var(--bg); }
+.run-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.run-row .btn { padding: 8px 14px; font-size: 0.88rem; }
+.verdict { font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 10px; border-radius: 6px; }
+.verdict.ok-v { color: var(--good); background: var(--good-soft); }
+.verdict.no-v { color: var(--bad); background: var(--bad-soft); }
+.decisions { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; max-width: 64ch; }
+.decisions li::marker { color: var(--accent); }
+.learned { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; font-size: 1.02rem; }
+.modal-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.modal-nav { display: flex; gap: 8px; }
+
+.palette { width: min(560px, calc(100% - 32px)); margin-top: 12vh; }
+.palette-input {
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line);
+}
+.palette-input svg { width: 18px; height: 18px; fill: var(--muted); flex: none; }
+.palette-input input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink);
+  font: inherit; font-size: 16px;
+}
+.palette-list { list-style: none; margin: 0; padding: 8px; max-height: 50vh; overflow-y: auto; }
+.palette-list .grp { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px 4px; }
+.palette-item {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 10px; border-radius: 8px; border: 0; background: none; text-align: left; cursor: pointer;
+  text-decoration: none; color: var(--ink); font-size: 0.95rem;
+}
+.palette-item span:last-child { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+.palette-item.active { background: var(--accent-soft); color: var(--accent); }
+.palette-empty { padding: 18px 10px; color: var(--muted); font-size: 0.9rem; }
+.palette-foot { display: flex; gap: 14px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 0.75rem; color: var(--muted); flex-wrap: wrap; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  transform: translateX(-50%); max-width: calc(100% - 32px); width: max-content;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px;
+  font-size: 0.9rem; box-shadow: 0 14px 34px -14px rgba(0,0,0,.5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast:not([hidden]) { animation: toastIn .25s ease-out; }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+}
 
 @media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 24px 56px; }
+  .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 16px 56px; }
   section.block { grid-template-columns: 1fr; gap: 18px; padding-block: 44px; }
   .about { grid-template-columns: 1fr; gap: 28px; }
   .projects { grid-template-columns: 1fr; }
   .skills { grid-template-columns: 1fr 1fr; }
+  .top nav { display: none; }
 }
 @media (max-width: 520px) {
-  .top nav { display: none; }
   .skills, .beyond { grid-template-columns: 1fr; }
   .now-list li { grid-template-columns: 1fr; gap: 2px; }
   .card { padding: 20px; }
   .term-body { height: 300px; }
   .term-input label .host { display: none; }
+  .modal-inner { padding: 20px; }
+  .pill-btn .lbl { display: none; }
+  .pitch canvas { height: 240px; }
 }
 </style>
 </head>
 <body>
+<div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+
 <div class="wrap">
   <header class="top">
     <span>soowlih.compaore</span>
@@ -321,18 +554,23 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       <nav aria-label="Sections">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
-        <a href="#now">Now</a>
+        <a href="#beyond">Soccer</a>
         <a href="#contact">Contact</a>
       </nav>
-      <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch color theme">
+      <button class="pill-btn" id="palette-btn" type="button" aria-label="Open quick menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>
+        <span class="lbl">Search</span> <kbd id="kbd-hint">⌘K</kbd>
+      </button>
+      <button class="pill-btn" id="theme-btn" type="button" aria-label="Switch color theme">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-9.54-4.5A5.4 5.4 0 0 1 13.36 3.1 9.3 9.3 0 0 0 12 3z"/></svg>
-        <span id="theme-label">Dark</span>
+        <span class="lbl" id="theme-label">Dark</span>
       </button>
     </div>
   </header>
 
   <section class="hero">
     <div>
+      <a class="status" href="#contact"><span class="pulse" aria-hidden="true"></span>Open to entry-level roles</a>
       <p class="eyebrow">Backend · Cloud · Security</p>
       <h1>Soowlih Compaore</h1>
       <p class="lede">
@@ -359,8 +597,8 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
         <a class="row" href="#about"><span class="m">GET</span><span class="p">/origin</span><span class="s ok">200</span><span class="d">Bronx → Burkina Faso → back to the Bronx</span></a>
         <a class="row" href="#education"><span class="m">GET</span><span class="p">/education</span><span class="s ok">200</span><span class="d">B.S. Computer Science, Fordham · May 2027</span></a>
         <a class="row" href="#experience"><span class="m">POST</span><span class="p">/internships/ibeta</span><span class="s ok">201</span><span class="d">AI Systems &amp; Cloud Infrastructure Lead Intern</span></a>
-        <a class="row" href="#projects"><span class="m">GET</span><span class="p">/awards/ramhack-2026</span><span class="s ok">200</span><span class="d">Best in Design, 20+ teams, built in 24 hours</span></a>
-        <a class="row" href="#projects"><span class="m">PUT</span><span class="p">/transactions/:id</span><span class="s no">403</span><span class="d">Blocked: not your data. SpendSmart checks ownership on every write.</span></a>
+        <a class="row" href="#projects" data-open="pawpath"><span class="m">GET</span><span class="p">/awards/ramhack-2026</span><span class="s ok">200</span><span class="d">Best in Design, 20+ teams, built in 24 hours</span></a>
+        <a class="row" href="#projects" data-open="spendsmart"><span class="m">PUT</span><span class="p">/transactions/:id</span><span class="s no">403</span><span class="d">Blocked: not your data. SpendSmart checks ownership on every write.</span></a>
         <div class="out dim">This terminal works. Click a request above, or type <span class="hi">help</span> below.</div>
       </div>
       <form class="term-input" id="term-form" autocomplete="off">
@@ -371,7 +609,7 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
         <button type="button" data-cmd="help">help</button>
         <button type="button" data-cmd="whoami">whoami</button>
         <button type="button" data-cmd="projects">projects</button>
-        <button type="button" data-cmd="soccer">soccer</button>
+        <button type="button" data-cmd="play">play</button>
         <button type="button" data-cmd="sudo hire soowlih">sudo hire soowlih</button>
       </div>
     </div>
@@ -425,36 +663,40 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       </div>
       <p class="filter-note" id="filter-note" hidden></p>
       <div class="projects" id="projects-grid">
-        <article class="card" data-cats="security backend">
+        <article class="card" tabindex="0" data-id="spendsmart" data-cats="security backend" data-tech="React|Node.js|Express|MongoDB|Passport.js|JWT|Jest|GitHub Actions|JavaScript|Rate limiting">
           <div class="top-line"><h3>SpendSmart</h3><span class="meta">2025 – Present</span></div>
           <p class="why">I wanted to learn to build login and data security the right way, so I built an expense tracker around it.</p>
           <p>Every query is scoped to the signed-in user. Refresh tokens live in HTTP-only cookies, reset links expire after one use, and each endpoint is rate limited.</p>
-          <div class="chips"><span class="chip">React</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MongoDB</span><span class="chip">Passport.js</span><span class="chip">JWT</span><span class="chip">Jest</span><span class="chip">GitHub Actions</span></div>
+          <div class="chips"><button type="button" class="chip">React</button><button type="button" class="chip">Node.js</button><button type="button" class="chip">Express</button><button type="button" class="chip">MongoDB</button><button type="button" class="chip">Passport.js</button><button type="button" class="chip">JWT</button><button type="button" class="chip">Jest</button><button type="button" class="chip">GitHub Actions</button></div>
           <div class="result"><b>What I learned</b>Security only counts if you can prove it. Tests run on every push and check that one user can't touch another's data.</div>
+          <button type="button" class="open-btn">See how it works <span aria-hidden="true">→</span></button>
         </article>
 
-        <article class="card" data-cats="backend security ai hackathon">
+        <article class="card" tabindex="0" data-id="pawpath" data-cats="backend security ai hackathon" data-tech="Node.js|Express|FastAPI|React|PostgreSQL|Supabase|Gemini|JavaScript|SQL">
           <div class="top-line"><h3>PawPath</h3><span class="award">Best in Design · RamHack 2026</span></div>
           <p class="why">An AI dog-walk planner, built by a small team in under 24 hours.</p>
           <p>I built the Express data layer for dog profiles and photo uploads on Supabase, and locked down every private endpoint with Supabase Auth and Google OAuth while teammates built the FastAPI and React sides.</p>
-          <div class="chips"><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">PostgreSQL</span><span class="chip">Supabase</span><span class="chip">Gemini</span></div>
+          <div class="chips"><button type="button" class="chip">Node.js</button><button type="button" class="chip">Express</button><button type="button" class="chip">FastAPI</button><button type="button" class="chip">React</button><button type="button" class="chip">PostgreSQL</button><button type="button" class="chip">Supabase</button><button type="button" class="chip">Gemini</button></div>
           <div class="result"><b>What I learned</b>Moving fast as a team works when everyone owns a clear piece. We won Best in Design out of 20+ teams.</div>
+          <button type="button" class="open-btn">See how it works <span aria-hidden="true">→</span></button>
         </article>
 
-        <article class="card" data-cats="ai backend">
+        <article class="card" tabindex="0" data-id="chatbot" data-cats="ai backend" data-tech="Python|FastAPI|LangChain|LangGraph|Gemini">
           <div class="top-line"><h3>AI Chatbot Agent API</h3><span class="meta">Summer 2025</span></div>
           <p class="why">My first AI agent. I wanted to see how a chatbot uses tools instead of only generating text.</p>
           <p>A FastAPI backend serves a LangChain agent on Google Gemini. It looks up locations and weather, and remembers the conversation with LangGraph checkpointing.</p>
-          <div class="chips"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">LangChain</span><span class="chip">LangGraph</span><span class="chip">Gemini</span></div>
+          <div class="chips"><button type="button" class="chip">Python</button><button type="button" class="chip">FastAPI</button><button type="button" class="chip">LangChain</button><button type="button" class="chip">LangGraph</button><button type="button" class="chip">Gemini</button></div>
           <div class="result"><b>What I learned</b>How agents call tools and keep memory, and how to set things up so the AI provider can be swapped without touching the code.</div>
+          <button type="button" class="open-btn">See how it works <span aria-hidden="true">→</span></button>
         </article>
 
-        <article class="card" data-cats="ai">
+        <article class="card" tabindex="0" data-id="houses" data-cats="ai" data-tech="Python|pandas|scikit-learn|Kaggle">
           <div class="top-line"><h3>House Price Prediction</h3><span class="meta">Oct 2026</span></div>
           <p class="why">My first machine learning model, built to help an investment firm spot underpriced homes.</p>
           <p>It predicts sale prices for 1,460 Iowa homes from 79 features. I explored the data with pandas, then trained and compared models on held-out data.</p>
-          <div class="chips"><span class="chip">Python</span><span class="chip">pandas</span><span class="chip">scikit-learn</span><span class="chip">Kaggle</span></div>
+          <div class="chips"><button type="button" class="chip">Python</button><button type="button" class="chip">pandas</button><button type="button" class="chip">scikit-learn</button><button type="button" class="chip">Kaggle</button></div>
           <div class="result"><b>What I learned</b>The right model matters. Switching to a random forest cut the average error by 25%, from $31,476 to $23,718.</div>
+          <button type="button" class="open-btn">See how it works <span aria-hidden="true">→</span></button>
         </article>
       </div>
     </div>
@@ -467,7 +709,7 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       <ul class="now-list">
         <li><span class="tag">Building</span><span>The authentication and real-time alert system for IBETA.</span></li>
         <li><span class="tag">Studying</span><span>For the AWS Certified Cloud Practitioner exam.</span></li>
-        <li><span class="tag">Looking for</span><span>A backend, cloud or security internship for summer 2027, or a new-grad role.</span></li>
+        <li><span class="tag">Looking for</span><span>An entry-level backend, cloud or security role.</span></li>
         <li><span class="tag">Meeting</span><span>Engineers and recruiters. If you work on backend or security, I'd like to hear about it.</span></li>
       </ul>
       <p class="meta" style="margin-top:18px">Updated November 2026</p>
@@ -478,23 +720,36 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
     <p class="label">Beyond code</p>
     <div>
       <h2>Soccer is my life.</h2>
+      <div class="pitch">
+        <canvas id="pitch" tabindex="0" aria-label="Keepy-uppy game. Click or tap the ball, or press Space, to keep it in the air."></canvas>
+        <div class="hud">
+          <span>Touches<b id="score">0</b></span>
+          <span class="right">Best<b id="best">0</b></span>
+        </div>
+        <div class="game-msg" id="game-msg">Tap the ball to juggle<small>Don't let it touch the ground.</small></div>
+      </div>
+      <p class="pitch-caption">A knee injury took me off the pitch, so you'll have to do the juggling.</p>
       <div class="beyond">
-        <div>
-          <h3>Soccer</h3>
-          <p>I played for years until a knee injury moved me to the sidelines. I still never miss a big game.</p>
-        </div>
-        <div>
-          <h3>The gym</h3>
-          <p>My reset button. Same idea as code: show up consistently and the progress comes.</p>
-        </div>
-        <div>
-          <h3>PS5</h3>
-          <p>F1, basketball, soccer and GTA. Always up for a race or a match.</p>
-        </div>
-        <div>
-          <h3>Sports documentaries</h3>
-          <p>I like seeing how great athletes and teams are built, behind the scenes. Sound familiar?</p>
-        </div>
+        <button type="button" class="hobby" data-hobby="soccer">
+          <span class="h-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5l3.6 2.6-1.4 4.2H9.8L8.4 10.1z" fill="currentColor"/></svg></span>
+          <span class="h-txt"><b>Soccer</b><span>I played for years until a knee injury moved me to the sidelines. I still never miss a big game.</span></span>
+          <span class="h-go" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="hobby" data-hobby="gym">
+          <span class="h-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 10h2V8h3v8H3v-2H1zM23 10h-2V8h-3v8h3v-2h2zM6 11h12v2H6z" fill="currentColor"/></svg></span>
+          <span class="h-txt"><b>The gym</b><span>My reset button. Same idea as code: show up consistently and the progress comes.</span></span>
+          <span class="h-go" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="hobby" data-hobby="ps5">
+          <span class="h-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 4.9 6l-.7 3.4a2.5 2.5 0 0 1-4.3 1.2L14.5 15h-5l-2.4 2.6a2.5 2.5 0 0 1-4.3-1.2L2.1 13A5 5 0 0 1 7 7zm0 3v1.5H5.5V13H7v1.5h1.5V13H10v-1.5H8.5V10zm9.5.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor"/></svg></span>
+          <span class="h-txt"><b>PS5</b><span>F1, basketball, soccer and GTA. Always up for a race or a match.</span></span>
+          <span class="h-go" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="hobby" data-hobby="docs">
+          <span class="h-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" stroke="currentColor" stroke-width="2"/></svg></span>
+          <span class="h-txt"><b>Sports documentaries</b><span>I like seeing how great athletes and teams are built, behind the scenes. Sound familiar?</span></span>
+          <span class="h-go" aria-hidden="true">→</span>
+        </button>
       </div>
     </div>
   </section>
@@ -502,19 +757,19 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
   <section class="block" id="skills">
     <p class="label">Skills</p>
     <div>
-      <p class="skills-hint">Click a highlighted skill to see the projects that use it.</p>
+      <p class="skills-hint">Click any skill to see where I've used it.</p>
       <div class="skills">
         <div>
           <h3>Languages &amp; frameworks</h3>
-          <div class="chips"><span class="chip">Python</span><span class="chip">JavaScript</span><span class="chip">C++</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">FastAPI</span><span class="chip">React</span><span class="chip">pandas</span><span class="chip">scikit-learn</span></div>
+          <div class="chips"><button type="button" class="chip">Python</button><button type="button" class="chip">JavaScript</button><button type="button" class="chip">C++</button><button type="button" class="chip">Node.js</button><button type="button" class="chip">Express</button><button type="button" class="chip">FastAPI</button><button type="button" class="chip">React</button><button type="button" class="chip">pandas</button><button type="button" class="chip">scikit-learn</button></div>
         </div>
         <div>
           <h3>Cloud &amp; data</h3>
-          <div class="chips"><span class="chip">AWS</span><span class="chip">Docker</span><span class="chip">GitHub Actions</span><span class="chip">PostgreSQL</span><span class="chip">MongoDB</span><span class="chip">DynamoDB</span><span class="chip">SQL</span></div>
+          <div class="chips"><button type="button" class="chip">AWS</button><button type="button" class="chip">Docker</button><button type="button" class="chip">GitHub Actions</button><button type="button" class="chip">PostgreSQL</button><button type="button" class="chip">MongoDB</button><button type="button" class="chip">DynamoDB</button><button type="button" class="chip">SQL</button></div>
         </div>
         <div>
           <h3>Security &amp; tools</h3>
-          <div class="chips"><span class="chip">JWT</span><span class="chip">Passport.js</span><span class="chip">bcrypt</span><span class="chip">IAM</span><span class="chip">Rate limiting</span><span class="chip">Supabase</span><span class="chip">Git</span><span class="chip">Postman</span></div>
+          <div class="chips"><button type="button" class="chip">JWT</button><button type="button" class="chip">Passport.js</button><button type="button" class="chip">bcrypt</button><button type="button" class="chip">IAM</button><button type="button" class="chip">Rate limiting</button><button type="button" class="chip">Supabase</button><button type="button" class="chip">Git</button><button type="button" class="chip">Postman</button></div>
         </div>
       </div>
     </div>
@@ -536,7 +791,7 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
 
   <section class="contact" id="contact">
     <h2>I want to build systems that work, on a team I can grow with.</h2>
-    <p>I'm looking for backend, cloud or security internships for summer 2027 and new-grad roles. If your team needs someone who will quietly get it done and done well, email me.</p>
+    <p>I'm looking for entry-level backend, cloud or security roles. If your team needs someone who will quietly get it done and done well, email me.</p>
     <div class="email">
       <span id="email-addr">scompaore1@fordham.edu</span>
       <button class="copy" id="copy-email" type="button">Copy</button>
@@ -547,77 +802,333 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
     </div>
   </section>
 
-  <footer>© 2026 Soowlih Compaore · Bronx, NY · Built by hand, no frameworks</footer>
+  <footer><span>© 2026 Soowlih Compaore · Bronx, NY</span><span>Built by hand, no frameworks · press <kbd>?</kbd> for shortcuts</span></footer>
 </div>
+
+<!-- Project detail -->
+<dialog id="project-modal" aria-labelledby="pm-title">
+  <div class="modal-inner">
+    <div class="modal-top">
+      <div>
+        <p class="meta" id="pm-meta"></p>
+        <h2 id="pm-title"></h2>
+        <p id="pm-tagline"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+      </button>
+    </div>
+    <div class="modal-section">
+      <h3 id="pm-flow-title">How a request flows</h3>
+      <ol class="pipeline" id="pm-flow"></ol>
+      <div class="run-row" id="pm-run"></div>
+    </div>
+    <div class="modal-section">
+      <h3>Key decisions</h3>
+      <ul class="decisions" id="pm-decisions"></ul>
+    </div>
+    <div class="modal-section">
+      <h3>What I learned</h3>
+      <p class="learned" id="pm-learned"></p>
+    </div>
+    <div class="modal-section">
+      <h3>Stack</h3>
+      <div class="chips" id="pm-stack"></div>
+    </div>
+    <div class="modal-foot">
+      <a class="btn" href="https://github.com/SOOWLIHH" target="_blank" rel="noopener">More on my GitHub</a>
+      <div class="modal-nav">
+        <button class="icon-btn" type="button" id="pm-prev" aria-label="Previous project"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 6.4 14 5l-7 7 7 7 1.4-1.4L9.8 12z"/></svg></button>
+        <button class="icon-btn" type="button" id="pm-next" aria-label="Next project"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 17.6 10 19l7-7-7-7-1.4 1.4 5.6 5.6z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Hobby panel -->
+<dialog id="hobby-modal" class="mini" aria-labelledby="hm-title">
+  <div class="modal-inner">
+    <div class="modal-top">
+      <div>
+        <p class="meta">Beyond code</p>
+        <h2 id="hm-title"></h2>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+      </button>
+    </div>
+    <div class="viz" id="hm-viz"></div>
+    <p class="hm-line" id="hm-line"></p>
+  </div>
+</dialog>
+
+<!-- Command palette -->
+<dialog id="palette" class="palette" aria-label="Quick menu">
+  <div class="palette-input">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>
+    <input id="palette-in" type="text" placeholder="Jump to a section, open a project, copy my email…" aria-label="Search the quick menu" autocomplete="off" spellcheck="false">
+  </div>
+  <ul class="palette-list" id="palette-list" role="listbox"></ul>
+  <div class="palette-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> select</span><span><kbd>Esc</kbd> close</span></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (function () {
   var EMAIL = 'scompaore1@fordham.edu';
+  var LINKEDIN = 'https://www.linkedin.com/in/Soowlih-Compaore';
+  var GITHUB = 'https://github.com/SOOWLIHH';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(id) { return document.getElementById(id); }
+  function go(id) { var el = $(id); if (el) el.scrollIntoView(); }
+
+  /* ---------- Toast ---------- */
+  var toastEl = $('toast'), toastTimer;
+  function toast(msg) {
+    toastEl.hidden = true; void toastEl.offsetWidth;
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2600);
+  }
 
   /* ---------- Copy email ---------- */
-  function copyText(text, onDone, onFail) {
-    try { navigator.clipboard.writeText(text).then(onDone, onFail); } catch (e) { onFail(); }
-  }
-  var copyBtn = document.getElementById('copy-email');
-  var addr = document.getElementById('email-addr');
-  copyBtn.addEventListener('click', function () {
-    copyText(EMAIL, function () {
-      copyBtn.textContent = 'Copied';
-      setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1800);
-    }, function () {
+  function copyEmail(btn) {
+    function fail() {
+      var addr = $('email-addr');
       var r = document.createRange(); r.selectNodeContents(addr);
       var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
-      copyBtn.textContent = 'Selected';
-    });
-  });
-
-  /* ---------- Theme toggle ---------- */
-  var root = document.documentElement;
-  var themeLabel = document.getElementById('theme-label');
-  var mq = window.matchMedia('(prefers-color-scheme: dark)');
-  function isDark() {
-    var t = root.getAttribute('data-theme');
-    return t ? t === 'dark' : mq.matches;
+      toast('Email selected. Press ⌘C or Ctrl+C to copy.');
+    }
+    try {
+      navigator.clipboard.writeText(EMAIL).then(function () {
+        toast('Copied ' + EMAIL);
+        if (btn) { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1800); }
+      }, fail);
+    } catch (e) { fail(); }
   }
-  function syncLabel() { themeLabel.textContent = isDark() ? 'Light' : 'Dark'; }
+  $('copy-email').addEventListener('click', function () { copyEmail(this); });
+
+  /* ---------- Theme ---------- */
+  var root = document.documentElement;
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  function isDark() { var t = root.getAttribute('data-theme'); return t ? t === 'dark' : mq.matches; }
+  function syncLabel() { $('theme-label').textContent = isDark() ? 'Light' : 'Dark'; }
   try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
   syncLabel();
-  mq.addEventListener && mq.addEventListener('change', syncLabel);
+  if (mq.addEventListener) mq.addEventListener('change', function () { syncLabel(); drawPitch(); });
   function setTheme(next) {
     root.setAttribute('data-theme', next);
     try { localStorage.setItem('theme', next); } catch (e) {}
-    syncLabel();
+    syncLabel(); drawPitch();
   }
-  document.getElementById('theme-btn').addEventListener('click', function () {
-    setTheme(isDark() ? 'light' : 'dark');
+  function toggleTheme() { setTheme(isDark() ? 'light' : 'dark'); }
+  $('theme-btn').addEventListener('click', toggleTheme);
+
+  /* ---------- Scroll progress ---------- */
+  var bar = $('progress-bar');
+  function onScroll() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* ---------- Project data ---------- */
+  var PROJECTS = {
+    spendsmart: {
+      name: 'SpendSmart', meta: 'Full-stack expense tracker · Sept 2025 – Present',
+      tagline: 'An expense tracker built around one rule: you can only ever see and change your own data.',
+      flowTitle: 'What happens when someone edits a transaction',
+      flow: [
+        ['React app', 'Sends the request with a short-lived access token'],
+        ['Rate limiter', 'Slows down anyone hammering the endpoint'],
+        ['Auth check', 'Passport.js verifies the JWT and finds the user'],
+        ['Ownership check', 'Is this transaction actually yours?'],
+        ['MongoDB', 'Query is scoped to your user ID, then saved']
+      ],
+      deny: { at: 3, label: 'Send as another user', msg: '403 Forbidden · not your data' },
+      okLabel: 'Send as the owner', okMsg: '200 OK · transaction updated',
+      decisions: [
+        'Refresh tokens live in HTTP-only cookies, so page scripts can never read them.',
+        'Password-reset links work once and then expire.',
+        'Every input is validated with Joi before it reaches the database.',
+        'Jest and Supertest tests run in GitHub Actions on every push.'
+      ],
+      learned: 'Security only counts if you can prove it. My tests try to read and change another user\'s transactions, and the build fails if they ever succeed.',
+      stack: ['React', 'Node.js', 'Express', 'MongoDB', 'Passport.js', 'JWT', 'Joi', 'Jest', 'GitHub Actions']
+    },
+    pawpath: {
+      name: 'PawPath', meta: 'RamHack 2026 · Best in Design · March 2026',
+      tagline: 'An AI dog-walk planner our team designed, built and shipped in under 24 hours.',
+      flowTitle: 'What happens when an owner saves a dog profile',
+      flow: [
+        ['React app', 'Owner fills in the profile and picks a photo'],
+        ['Google sign-in', 'Supabase Auth with Google OAuth proves who they are'],
+        ['Auth middleware', 'My Express middleware rejects anyone not signed in'],
+        ['Express API', 'Multer handles the photo upload, then the CRUD route runs'],
+        ['Supabase Postgres', 'The profile is saved, ready for Gemini to plan walks']
+      ],
+      deny: { at: 2, label: 'Send without signing in', msg: '401 Unauthorized · sign in first' },
+      okLabel: 'Send signed in', okMsg: '201 Created · dog profile saved',
+      decisions: [
+        'I owned the Express data layer so teammates could build FastAPI and React in parallel.',
+        'Every protected endpoint sits behind the same auth middleware.',
+        'Gemini and Google APIs plan walks from each dog\'s profile.'
+      ],
+      learned: 'Speed comes from clear ownership. With each person on one layer, we went from idea to award in a day.',
+      stack: ['Node.js', 'Express', 'FastAPI', 'React', 'PostgreSQL', 'Supabase', 'Google OAuth', 'Gemini']
+    },
+    chatbot: {
+      name: 'AI Chatbot Agent API', meta: 'Tool-using LLM agent · June – Aug 2025',
+      tagline: 'A chat API where the AI can look things up instead of only generating text.',
+      flowTitle: 'What happens when you ask "What\'s the weather where I am?"',
+      flow: [
+        ['Client', 'Sends the message to the chat endpoint'],
+        ['FastAPI /chat', 'Loads your conversation from LangGraph memory'],
+        ['LangChain agent', 'Gemini decides it needs a tool'],
+        ['Tools', 'Looks up your location, then the weather there'],
+        ['Reply', 'Gemini answers with real data and saves the turn']
+      ],
+      okLabel: 'Send message', okMsg: '200 OK · "It\'s 54°F and cloudy in the Bronx."',
+      decisions: [
+        'Tool calling lets the agent fetch live data instead of guessing.',
+        'LangGraph checkpointing gives the agent memory across messages.',
+        'CORS and environment-based settings mean the AI provider can be swapped without code changes.'
+      ],
+      learned: 'How agents actually decide to use tools, and why keeping configuration out of the code makes a project easy to change later.',
+      stack: ['Python', 'FastAPI', 'LangChain', 'LangGraph', 'Gemini']
+    },
+    houses: {
+      name: 'House Price Prediction', meta: 'Machine learning · Oct 2026',
+      tagline: 'A model that helps a real estate investment firm spot underpriced homes.',
+      flowTitle: 'From raw data to a better model',
+      flow: [
+        ['Kaggle data', '1,460 Iowa home sales with 79 features each'],
+        ['Explore with pandas', 'Price distributions and categorical features'],
+        ['Decision tree', 'Validation error (MAE): $31,476'],
+        ['Random forest', 'Validation error (MAE): $23,718'],
+        ['Result', '25% lower error on held-out data']
+      ],
+      okLabel: 'Run the pipeline', okMsg: 'MAE $31,476 → $23,718 · 25% better',
+      decisions: [
+        'Scored every model on held-out data so the results are honest.',
+        'Used mean absolute error, which reads directly in dollars.',
+        'Replaced a single decision tree with a random forest.'
+      ],
+      learned: 'Picking the right model can matter more than tuning the wrong one, and you only know if you measure on data the model has never seen.',
+      stack: ['Python', 'pandas', 'scikit-learn', 'Kaggle']
+    }
+  };
+  var ORDER = ['spendsmart', 'pawpath', 'chatbot', 'houses'];
+
+  /* ---------- Project detail dialog ---------- */
+  var modal = $('project-modal');
+  var current = null, runTimers = [];
+
+  function clearRun() { runTimers.forEach(clearTimeout); runTimers = []; }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function renderFlow(p) {
+    var list = $('pm-flow'); list.innerHTML = '';
+    p.flow.forEach(function (s, i) {
+      var li = el('li', 'step');
+      li.appendChild(el('span', 'dot', String(i + 1)));
+      var t = el('div', 'txt'); t.appendChild(el('b', null, s[0])); t.appendChild(el('span', null, s[1]));
+      li.appendChild(t); list.appendChild(li);
+    });
+    var run = $('pm-run'); run.innerHTML = '';
+    var okBtn = el('button', 'btn primary', '▶ ' + p.okLabel); okBtn.type = 'button';
+    okBtn.addEventListener('click', function () { animate(p, null); });
+    run.appendChild(okBtn);
+    if (p.deny) {
+      var noBtn = el('button', 'btn', '▶ ' + p.deny.label); noBtn.type = 'button';
+      noBtn.addEventListener('click', function () { animate(p, p.deny); });
+      run.appendChild(noBtn);
+    }
+    var v = el('span', 'verdict'); v.id = 'pm-verdict'; v.hidden = true; run.appendChild(v);
+  }
+
+  function animate(p, deny) {
+    clearRun();
+    var steps = $('pm-flow').children, v = $('pm-verdict');
+    Array.prototype.forEach.call(steps, function (s) { s.className = 'step'; });
+    v.hidden = true;
+    var last = deny ? deny.at : steps.length - 1;
+    var delay = reduceMotion ? 0 : 420;
+    for (var i = 0; i <= last; i++) {
+      (function (i) {
+        runTimers.push(setTimeout(function () {
+          if (i > 0) steps[i - 1].className = 'step done';
+          if (deny && i === last) steps[i].className = 'step deny';
+          else steps[i].className = 'step lit';
+          if (i === last) {
+            runTimers.push(setTimeout(function () {
+              if (!deny) steps[i].className = 'step done';
+              v.className = 'verdict ' + (deny ? 'no-v' : 'ok-v');
+              v.textContent = deny ? deny.msg : p.okMsg;
+              v.hidden = false;
+            }, delay));
+          }
+        }, i * delay));
+      })(i);
+    }
+  }
+
+  function openProject(id) {
+    var p = PROJECTS[id]; if (!p) return;
+    current = id; clearRun();
+    $('pm-meta').textContent = p.meta;
+    $('pm-title').textContent = p.name;
+    $('pm-tagline').textContent = p.tagline;
+    $('pm-flow-title').textContent = p.flowTitle;
+    renderFlow(p);
+    var d = $('pm-decisions'); d.innerHTML = '';
+    p.decisions.forEach(function (x) { d.appendChild(el('li', null, x)); });
+    $('pm-learned').textContent = p.learned;
+    var st = $('pm-stack'); st.innerHTML = '';
+    p.stack.forEach(function (x) { st.appendChild(el('span', 'chip', x)); });
+    if (!modal.open) modal.showModal();
+    modal.scrollTop = 0;
+    if (!reduceMotion) setTimeout(function () { animate(p, null); }, 350);
+  }
+  function step(dir) {
+    var i = ORDER.indexOf(current);
+    openProject(ORDER[(i + dir + ORDER.length) % ORDER.length]);
+  }
+  $('pm-prev').addEventListener('click', function () { step(-1); });
+  $('pm-next').addEventListener('click', function () { step(1); });
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal || e.target.closest('[data-close]')) modal.close();
+  });
+  modal.addEventListener('close', clearRun);
+  modal.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
   });
 
-  /* ---------- Project filters ---------- */
+  /* ---------- Project filters + skill chips ---------- */
   var cards = Array.prototype.slice.call(document.querySelectorAll('#projects-grid .card'));
   var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.filter'));
-  var note = document.getElementById('filter-note');
-  var LABELS = { security: 'Security', backend: 'Backend', ai: 'AI & ML', hackathon: 'Hackathon' };
-
-  function techOf(card) {
-    return Array.prototype.map.call(card.querySelectorAll('.chip'), function (c) { return c.textContent.trim(); });
-  }
+  var note = $('filter-note');
+  function techOf(card) { return card.dataset.tech.split('|'); }
   function matches(card, f) {
     if (f.type === 'all') return true;
-    if (f.type === 'cat') return (' ' + card.dataset.cats + ' ').indexOf(' ' + f.value + ' ') > -1;
+    if (f.type === 'cat') return card.dataset.cats.split(' ').indexOf(f.value) > -1;
     return techOf(card).indexOf(f.value) > -1;
   }
   filterBtns.forEach(function (b) {
     var key = b.dataset.filter;
-    var n = key === 'all' ? cards.length : cards.filter(function (c) { return matches(c, { type: 'cat', value: key }); }).length;
-    b.querySelector('.n').textContent = n;
+    b.querySelector('.n').textContent = key === 'all' ? cards.length : cards.filter(function (c) { return matches(c, { type: 'cat', value: key }); }).length;
   });
-
   function applyFilter(f) {
     var shown = 0;
     cards.forEach(function (card) {
-      var ok = matches(card, f);
+      var ok = matches(card, f), was = card.hidden;
       card.hidden = !ok;
-      if (ok) shown++;
+      if (ok) {
+        shown++;
+        if (was || f.type !== 'all') { card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter'); }
+      }
       card.querySelectorAll('.chip').forEach(function (c) {
         c.classList.toggle('match', f.type === 'tech' && c.textContent.trim() === f.value);
       });
@@ -627,16 +1138,12 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     if (f.type === 'tech') {
-      note.hidden = false;
-      note.innerHTML = '';
+      note.hidden = false; note.innerHTML = '';
       note.appendChild(document.createTextNode(shown + (shown === 1 ? ' project uses ' : ' projects use ') + f.value + '. '));
-      var clear = document.createElement('button');
-      clear.type = 'button'; clear.textContent = 'Show all';
+      var clear = el('button', null, 'Show all'); clear.type = 'button';
       clear.addEventListener('click', function () { applyFilter({ type: 'all' }); });
       note.appendChild(clear);
-    } else {
-      note.hidden = true;
-    }
+    } else { note.hidden = true; }
     return shown;
   }
   filterBtns.forEach(function (b) {
@@ -646,112 +1153,375 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
     });
   });
 
-  /* Skill chips that appear in a project become buttons */
-  var used = {};
-  cards.forEach(function (c) { techOf(c).forEach(function (t) { used[t] = true; }); });
-  document.querySelectorAll('#skills .chip').forEach(function (chip) {
-    var name = chip.textContent.trim();
-    if (!used[name]) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'chip'; btn.textContent = name;
-    btn.setAttribute('aria-label', 'Show projects that use ' + name);
-    btn.addEventListener('click', function () {
-      applyFilter({ type: 'tech', value: name });
-      document.getElementById('projects').scrollIntoView();
+  var SKILL_NOTES = {
+    'C++': 'C++: Fordham coursework, including Data Structures & Algorithms.',
+    'AWS': 'AWS: part of my cloud work, and I\'m studying for AWS Cloud Practitioner.',
+    'DynamoDB': 'DynamoDB: AWS\'s NoSQL database, part of my AWS cloud studies.',
+    'IAM': 'IAM: controlling who can do what on AWS. Security, but for the cloud.',
+    'Docker': 'Docker: how I package apps so they run the same everywhere.',
+    'bcrypt': 'bcrypt: how I hash passwords so they are never stored in plain text.',
+    'Git': 'Git: on every project I build.',
+    'Postman': 'Postman: how I test every API before anyone else touches it.'
+  };
+  function filterByTech(name) {
+    var n = cards.filter(function (c) { return techOf(c).indexOf(name) > -1; }).length;
+    if (!n) { toast(SKILL_NOTES[name] || name + ' is part of my toolkit.'); return; }
+    applyFilter({ type: 'tech', value: name });
+    go('projects');
+  }
+  document.addEventListener('click', function (e) {
+    var chip = e.target.closest('button.chip');
+    if (chip) { e.stopPropagation(); filterByTech(chip.textContent.trim()); return; }
+    var card = e.target.closest('.card');
+    if (card && !e.target.closest('a')) openProject(card.dataset.id);
+  });
+  cards.forEach(function (card) {
+    card.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === card) { e.preventDefault(); openProject(card.dataset.id); }
     });
-    chip.replaceWith(btn);
+  });
+  document.querySelectorAll('a.row[data-open]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); openProject(a.dataset.open); });
+  });
+
+  /* ---------- Keepy-uppy ---------- */
+  var canvas = $('pitch'), ctx = canvas.getContext('2d');
+  var scoreEl = $('score'), bestEl = $('best'), msgEl = $('game-msg');
+  var W = 0, H = 0, R = 26, G = 1100;
+  var ball = { x: 0, y: 0, vx: 0, vy: 0, rot: 0 };
+  var state = 'idle', score = 0, best = 0, running = false, lastT = 0;
+  try { best = parseInt(localStorage.getItem('keepy-best') || '0', 10) || 0; } catch (e) {}
+  bestEl.textContent = best;
+  var MILESTONES = { 5: 'Nice touch', 10: 'Academy level', 20: 'Sign this player', 35: 'Starting XI', 50: 'Ballon d\'Or' };
+
+  function ground() { return H - 26; }
+  function size() {
+    var rect = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    W = rect.width; H = rect.height;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (state !== 'play') { if (state === 'idle') ball.x = W / 2; ball.x = Math.min(Math.max(ball.x, R), W - R); ball.y = ground() - R; }
+    drawPitch();
+  }
+  function cssVar(n) { return getComputedStyle(document.body).getPropertyValue(n).trim(); }
+
+  function pentagon(cx, cy, r, a) {
+    ctx.beginPath();
+    for (var i = 0; i < 5; i++) {
+      var t = a + i * Math.PI * 2 / 5 - Math.PI / 2;
+      ctx[i ? 'lineTo' : 'moveTo'](cx + r * Math.cos(t), cy + r * Math.sin(t));
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  function drawBall(x, y, rot) {
+    var ink = '#1b1d22';
+    // shadow
+    var h = Math.max(0, ground() - (y + R));
+    var s = Math.max(0.35, 1 - h / 260);
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.18 * s) + ')';
+    ctx.beginPath(); ctx.ellipse(x, ground() + 2, R * s, R * 0.22 * s, 0, 0, Math.PI * 2); ctx.fill();
+    // ball
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.closePath();
+    ctx.fillStyle = '#fbfbfb'; ctx.fill();
+    ctx.clip();
+    ctx.fillStyle = ink;
+    pentagon(x, y, R * 0.36, rot);
+    for (var i = 0; i < 5; i++) {
+      var a = rot + i * Math.PI * 2 / 5;
+      pentagon(x + Math.sin(a) * R * 0.98, y - Math.cos(a) * R * 0.98, R * 0.36, a + Math.PI);
+    }
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.2;
+    for (var j = 0; j < 5; j++) {
+      var b = rot + j * Math.PI * 2 / 5;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.sin(b) * R * 0.36, y - Math.cos(b) * R * 0.36);
+      ctx.lineTo(x + Math.sin(b) * R * 0.66, y - Math.cos(b) * R * 0.66);
+      ctx.stroke();
+    }
+    // shading
+    var g = ctx.createRadialGradient(x - R * 0.4, y - R * 0.45, R * 0.1, x, y, R);
+    g.addColorStop(0, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(0,0,0,0.22)');
+    ctx.fillStyle = g; ctx.fillRect(x - R, y - R, R * 2, R * 2);
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+  function drawPitch() {
+    if (!W) return;
+    ctx.clearRect(0, 0, W, H);
+    var line = cssVar('--pitch-line') || '#c9d8c7';
+    // mowing stripes
+    ctx.fillStyle = line; ctx.globalAlpha = 0.35;
+    for (var x = 0; x < W; x += 80) ctx.fillRect(x, 0, 40, H);
+    ctx.globalAlpha = 1;
+    // halfway circle + ground line
+    ctx.strokeStyle = line; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(W / 2, ground(), Math.min(110, W / 4), Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, ground()); ctx.lineTo(W, ground()); ctx.stroke();
+    drawBall(ball.x, ball.y, ball.rot);
+  }
+  function setMsg(title, sub) {
+    if (!title) { msgEl.hidden = true; return; }
+    msgEl.hidden = false; msgEl.innerHTML = '';
+    msgEl.appendChild(document.createTextNode(title));
+    if (sub) { var s = document.createElement('small'); s.textContent = sub; msgEl.appendChild(s); }
+  }
+  function tick(t) {
+    var dt = Math.min(0.033, (t - lastT) / 1000 || 0); lastT = t;
+    ball.vy += G * dt;
+    ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+    ball.rot += ball.vx * dt / R;
+    if (ball.x < R) { ball.x = R; ball.vx = Math.abs(ball.vx) * 0.8; }
+    if (ball.x > W - R) { ball.x = W - R; ball.vx = -Math.abs(ball.vx) * 0.8; }
+    if (ball.y < R) { ball.y = R; ball.vy = Math.abs(ball.vy) * 0.5; }
+    if (ball.y > ground() - R) {
+      ball.y = ground() - R;
+      if (state === 'play') {
+        state = 'over';
+        if (score > best) { best = score; bestEl.textContent = best; try { localStorage.setItem('keepy-best', best); } catch (e) {} setMsg('New best: ' + score + '!', 'Tap the ball to go again.'); }
+        else setMsg(score === 1 ? '1 touch' : score + ' touches', 'It hit the ground. Tap the ball to go again.');
+      }
+      ball.vy = -ball.vy * 0.45; ball.vx *= 0.85;
+      if (Math.abs(ball.vy) < 60) ball.vy = 0;
+    }
+    drawPitch();
+    var resting = state !== 'play' && ball.vy === 0 && ball.y >= ground() - R - 0.5 && Math.abs(ball.vx) < 5;
+    if (resting) { ball.vx = 0; running = false; return; }
+    requestAnimationFrame(tick);
+  }
+  function startLoop() { if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(tick); } }
+  function kick(px, py) {
+    if (state !== 'play') { state = 'play'; score = 0; }
+    score++; scoreEl.textContent = score;
+    setMsg(MILESTONES[score] || null);
+    if (MILESTONES[score]) setTimeout(function () { if (state === 'play') setMsg(null); }, 1100);
+    var off = (ball.x - px) / R;
+    ball.vy = -(600 + Math.random() * 50);
+    // Pull the ball back toward the middle so it rarely drifts off to a wall
+    var centerPull = (W / 2 - ball.x) * 0.35;
+    ball.vx = Math.max(-220, Math.min(220, ball.vx * 0.25 + off * 110 + centerPull + (Math.random() - 0.5) * 40));
+    startLoop();
+  }
+  canvas.addEventListener('pointerdown', function (e) {
+    var r = canvas.getBoundingClientRect();
+    var px = e.clientX - r.left, py = e.clientY - r.top;
+    var dx = px - ball.x, dy = py - ball.y;
+    // Generous hit zone: anywhere near the ball, or anywhere below it while it's falling
+    var near = dx * dx + dy * dy <= (R * 3.4) * (R * 3.4);
+    var under = Math.abs(dx) <= R * 3 && dy > 0 && ball.vy > 0;
+    if (near || under) { e.preventDefault(); kick(px, py); }
+  });
+  canvas.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); kick(ball.x + (Math.random() - 0.5) * R, ball.y + R); }
+  });
+  if (window.ResizeObserver) new ResizeObserver(size).observe(canvas); else window.addEventListener('resize', size);
+  size();
+
+  /* ---------- Hobby panels ---------- */
+  var hobbyModal = $('hobby-modal'), hmViz = $('hm-viz');
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) { var n = document.createElementNS(SVGNS, tag); for (var k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  function playGame() {
+    hobbyModal.close(); go('beyond');
+    setTimeout(function () { canvas.focus({ preventScroll: true }); }, 400);
+  }
+
+  var HOBBIES = {
+    soccer: {
+      title: 'Soccer',
+      line: 'Soccer is my life. I played for years until a knee injury moved me to the sidelines. Now I make sure I never miss a big game.',
+      render: function (v) {
+        var s = svgEl('svg', { viewBox: '0 0 300 130', role: 'img', 'aria-label': 'A soccer pitch with a bouncing ball' });
+        var line = { fill: 'none', stroke: 'var(--pitch-line)', 'stroke-width': 2 };
+        s.appendChild(svgEl('rect', { x: 4, y: 4, width: 292, height: 122, rx: 6, fill: 'var(--pitch)', stroke: 'var(--pitch-line)', 'stroke-width': 2 }));
+        s.appendChild(svgEl('line', Object.assign({ x1: 150, y1: 4, x2: 150, y2: 126 }, line)));
+        s.appendChild(svgEl('circle', Object.assign({ cx: 150, cy: 65, r: 22 }, line)));
+        s.appendChild(svgEl('rect', Object.assign({ x: 4, y: 35, width: 34, height: 60 }, line)));
+        s.appendChild(svgEl('rect', Object.assign({ x: 262, y: 35, width: 34, height: 60 }, line)));
+        s.appendChild(svgEl('ellipse', { cx: 150, cy: 106, rx: 10, ry: 3, fill: 'rgba(0,0,0,.18)' }));
+        var g = svgEl('g', { class: 'mini-ball' });
+        g.appendChild(svgEl('circle', { cx: 150, cy: 94, r: 10, fill: '#fbfbfb', stroke: '#1b1d22', 'stroke-width': 1.2 }));
+        g.appendChild(svgEl('path', { d: 'M150 89.5l4.3 3.1-1.6 5h-5.4l-1.6-5z', fill: '#1b1d22' }));
+        s.appendChild(g);
+        v.appendChild(s);
+        v.appendChild(el('p', 'viz-note', best ? 'Best on this device: ' + best + (best === 1 ? ' touch' : ' touches') : 'No one has juggled here yet.'));
+        var row = el('div', 'viz-row'), b = el('button', 'btn primary', 'Juggle the ball'); b.type = 'button';
+        b.addEventListener('click', playGame); row.appendChild(b); v.appendChild(row);
+      }
+    },
+    gym: {
+      title: 'The gym',
+      line: 'My reset button. Same idea as code: show up consistently and the progress comes.',
+      render: function (v) {
+        var plates = 0, MAX = 4;
+        var s = svgEl('svg', { viewBox: '0 0 320 100', role: 'img', 'aria-label': 'A barbell you can load with plates' });
+        s.appendChild(svgEl('rect', { x: 8, y: 46, width: 304, height: 8, rx: 3, class: 'bar-metal' }));
+        s.appendChild(svgEl('rect', { x: 96, y: 36, width: 8, height: 28, rx: 2, class: 'bar-metal' }));
+        s.appendChild(svgEl('rect', { x: 216, y: 36, width: 8, height: 28, rx: 2, class: 'bar-metal' }));
+        var plateG = svgEl('g', {}); s.appendChild(plateG);
+        v.appendChild(s);
+        var big = el('div', 'viz-big'); v.appendChild(big);
+        var note = el('p', 'viz-note'); note.setAttribute('aria-live', 'polite'); v.appendChild(note);
+        var row = el('div', 'viz-row');
+        var add = el('button', 'btn primary', '+ Add a plate'); add.type = 'button';
+        var reset = el('button', 'btn', 'Reset'); reset.type = 'button';
+        row.appendChild(add); row.appendChild(reset); v.appendChild(row);
+        var NOTES = ['Just the bar. Everyone starts here.', 'Warm-up weight.', 'Now we\'re working.', 'Consistency got you here.', 'Four plates. Respect.'];
+        function draw(animateLast) {
+          plateG.innerHTML = '';
+          for (var i = 0; i < plates; i++) {
+            var cls = 'plate' + (i % 2 ? ' alt' : '') + (animateLast && i === plates - 1 ? ' new' : '');
+            plateG.appendChild(svgEl('rect', { x: 80 - i * 17, y: 10, width: 14, height: 80, rx: 3, class: cls }));
+            plateG.appendChild(svgEl('rect', { x: 226 + i * 17, y: 10, width: 14, height: 80, rx: 3, class: cls }));
+          }
+          big.textContent = (45 + plates * 90) + ' lb';
+          note.textContent = NOTES[plates];
+          add.disabled = plates >= MAX;
+        }
+        add.addEventListener('click', function () { if (plates < MAX) { plates++; draw(true); } });
+        reset.addEventListener('click', function () { plates = 0; draw(false); });
+        draw(false);
+      }
+    },
+    ps5: {
+      title: 'PS5',
+      line: 'How I switch off after a long day of debugging. Pick a button.',
+      render: function (v) {
+        var GAMES = [
+          { k: 'tri', c: '#3fb68b', n: 'F1', d: 'Racing. Every tenth of a second counts.' },
+          { k: 'cir', c: '#e5484d', n: 'Basketball', d: 'Fast breaks and buzzer beaters.' },
+          { k: 'x', c: '#4c8df6', n: 'Soccer', d: 'Obviously. Bring your best team.' },
+          { k: 'sq', c: '#d36ac2', n: 'GTA', d: 'Open world. Anything can happen.' }
+        ];
+        var screen = el('div', 'screen'); screen.setAttribute('aria-live', 'polite');
+        v.appendChild(screen);
+        var row = el('div', 'ps-btns'); v.appendChild(row);
+        var btns = [];
+        function shape(g) {
+          var s = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' });
+          var a = { fill: 'none', stroke: g.c, 'stroke-width': 2.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+          if (g.k === 'tri') s.appendChild(svgEl('path', Object.assign({ d: 'M12 4.5 20 18.5H4z' }, a)));
+          if (g.k === 'cir') s.appendChild(svgEl('circle', Object.assign({ cx: 12, cy: 12, r: 7.5 }, a)));
+          if (g.k === 'x') s.appendChild(svgEl('path', Object.assign({ d: 'M5.5 5.5l13 13M18.5 5.5l-13 13' }, a)));
+          if (g.k === 'sq') s.appendChild(svgEl('rect', Object.assign({ x: 5, y: 5, width: 14, height: 14, rx: 1 }, a)));
+          return s;
+        }
+        function pick(i) {
+          var g = GAMES[i];
+          screen.innerHTML = '';
+          screen.appendChild(el('span', null, '▶ NOW PLAYING'));
+          screen.appendChild(el('b', null, g.n));
+          screen.appendChild(el('span', null, g.d));
+          btns.forEach(function (b, j) { b.setAttribute('aria-pressed', i === j ? 'true' : 'false'); });
+        }
+        GAMES.forEach(function (g, i) {
+          var b = el('button', 'ps'); b.type = 'button'; b.setAttribute('aria-label', g.n);
+          b.appendChild(shape(g));
+          b.addEventListener('click', function () { pick(i); });
+          btns.push(b); row.appendChild(b);
+        });
+        pick(0);
+      }
+    },
+    docs: {
+      title: 'Sports documentaries',
+      line: 'It\'s the same reason I like the backend: the system behind the result is the interesting part.',
+      render: function (v) {
+        var FRAMES = [
+          ['The grind', 'The training nobody films.'],
+          ['The setback', 'Injuries, losses and starting over.'],
+          ['The system', 'The coaches, data and habits behind every win.']
+        ];
+        var strip = el('div', 'strip'); v.appendChild(strip);
+        var note = el('p', 'viz-note'); note.setAttribute('aria-live', 'polite'); v.appendChild(note);
+        var frames = FRAMES.map(function (f, i) {
+          var b = el('button', 'frame', f[0]); b.type = 'button';
+          b.addEventListener('click', function () { show(i); });
+          strip.appendChild(b); return b;
+        });
+        function show(i) {
+          note.textContent = FRAMES[i][1];
+          frames.forEach(function (b, j) { b.setAttribute('aria-pressed', i === j ? 'true' : 'false'); });
+        }
+        show(0);
+      }
+    }
+  };
+  function openHobby(id) {
+    var h = HOBBIES[id]; if (!h) return;
+    $('hm-title').textContent = h.title;
+    $('hm-line').textContent = h.line;
+    hmViz.innerHTML = '';
+    h.render(hmViz);
+    if (!hobbyModal.open) hobbyModal.showModal();
+  }
+  document.querySelectorAll('.hobby').forEach(function (b) {
+    b.addEventListener('click', function () { openHobby(b.dataset.hobby); });
+  });
+  hobbyModal.addEventListener('click', function (e) {
+    if (e.target === hobbyModal || e.target.closest('[data-close]')) hobbyModal.close();
   });
 
   /* ---------- Terminal ---------- */
-  var body = document.getElementById('term-body');
-  var form = document.getElementById('term-form');
-  var input = document.getElementById('term-in');
+  var body = $('term-body'), form = $('term-form'), input = $('term-in');
   var history = [], hIndex = 0;
-
-  function go(id) { var el = document.getElementById(id); if (el) el.scrollIntoView(); }
-
   var COMMANDS = {
     help: function () {
       return [
-        '<span class="hi">whoami</span>      who I am, in one line',
-        '<span class="hi">origin</span>      where I\'m from',
-        '<span class="hi">projects</span>    what I\'ve built',
-        '<span class="hi">skills</span>      my stack',
-        '<span class="hi">now</span>         what I\'m working on',
-        '<span class="hi">soccer</span>      the important stuff',
-        '<span class="hi">contact</span>     how to reach me',
-        '<span class="hi">cd</span> &lt;section&gt;  jump to about, projects, now, skills or contact',
-        '<span class="hi">theme</span>       switch light / dark',
-        '<span class="hi">clear</span>       clear the screen'
+        '<span class="hi">whoami</span>         who I am, in one line',
+        '<span class="hi">origin</span>         where I\'m from',
+        '<span class="hi">projects</span>       what I\'ve built',
+        '<span class="hi">open</span> &lt;name&gt;    open a project (spendsmart, pawpath, chatbot, houses)',
+        '<span class="hi">skills</span>         my stack',
+        '<span class="hi">now</span>            what I\'m working on',
+        '<span class="hi">soccer</span>         the important stuff',
+        '<span class="hi">play</span>           juggle a ball',
+        '<span class="hi">contact</span>        how to reach me',
+        '<span class="hi">cd</span> &lt;section&gt;   jump to about, projects, now, skills or contact',
+        '<span class="hi">theme</span>          switch light / dark',
+        '<span class="hi">clear</span>          clear the screen'
       ].join('\n');
     },
-    whoami: function () {
-      return 'Soowlih Compaore. CS student at Fordham (Class of 2027, Cybersecurity minor).\nI build backends: auth, data and cloud infrastructure.';
-    },
-    origin: function () {
-      return 'Born in the Bronx → childhood in the U.S. and Burkina Faso → back to NYC for college.';
-    },
+    whoami: function () { return 'Soowlih Compaore. CS student at Fordham (Class of 2027, Cybersecurity minor).\nI build backends: auth, data and cloud infrastructure.'; },
+    origin: function () { return 'Born in the Bronx → childhood in the U.S. and Burkina Faso → back to NYC for college.'; },
     projects: function () {
       return [
-        '<span class="ok">SpendSmart</span>        expense tracker, built around secure auth',
-        '<span class="ok">PawPath</span>           AI dog-walk planner · Best in Design, RamHack 2026',
-        '<span class="ok">AI Chatbot Agent</span>  tool-using LLM agent on FastAPI + Gemini',
-        '<span class="ok">House Prices</span>      ML model, 25% lower error with a random forest',
-        '<span class="dim">Type</span> <span class="hi">cd projects</span> <span class="dim">to see them all.</span>'
+        '<span class="ok">spendsmart</span>   expense tracker, built around secure auth',
+        '<span class="ok">pawpath</span>      AI dog-walk planner · Best in Design, RamHack 2026',
+        '<span class="ok">chatbot</span>      tool-using LLM agent on FastAPI + Gemini',
+        '<span class="ok">houses</span>       ML model, 25% lower error with a random forest',
+        '<span class="dim">Try</span> <span class="hi">open spendsmart</span>'
       ].join('\n');
     },
-    skills: function () {
-      return 'lang      Python, JavaScript, C++\nbackend   Node.js, Express, FastAPI\ndata      PostgreSQL, MongoDB, DynamoDB, SQL\ncloud     AWS, Docker, GitHub Actions\nsecurity  JWT, Passport.js, bcrypt, IAM, rate limiting';
-    },
-    now: function () {
-      return 'Building IBETA\'s auth and real-time alert system.\nStudying for AWS Cloud Practitioner.\nLooking for a summer 2027 internship or new-grad role.';
-    },
-    soccer: function () {
-      return 'Soccer is my life. Played for years until a knee injury moved me to the sidelines.\nStill never miss a big game. On PS5: F1, basketball, soccer, GTA.';
-    },
+    skills: function () { return 'lang      Python, JavaScript, C++\nbackend   Node.js, Express, FastAPI\ndata      PostgreSQL, MongoDB, DynamoDB, SQL\ncloud     AWS, Docker, GitHub Actions\nsecurity  JWT, Passport.js, bcrypt, IAM, rate limiting'; },
+    now: function () { return 'Building IBETA\'s auth and real-time alert system.\nStudying for AWS Cloud Practitioner.\nLooking for an entry-level backend, cloud or security role.'; },
+    soccer: function () { return 'Soccer is my life. Played for years until a knee injury moved me to the sidelines.\nStill never miss a big game. On PS5: F1, basketball, soccer, GTA.\nType <span class="hi">play</span> to juggle.'; },
+    play: function () { go('beyond'); setTimeout(function () { canvas.focus({ preventScroll: true }); }, 500); return '<span class="dim">→ /beyond · tap the ball, or press Space</span>'; },
     contact: function () {
-      return 'email     <span class="hi">' + EMAIL + '</span>\nlinkedin  <a href="https://www.linkedin.com/in/Soowlih-Compaore" target="_blank" rel="noopener">linkedin.com/in/Soowlih-Compaore</a>\ngithub    <a href="https://github.com/SOOWLIHH" target="_blank" rel="noopener">github.com/SOOWLIHH</a>';
+      return 'email     <span class="hi">' + EMAIL + '</span>\nlinkedin  <a href="' + LINKEDIN + '" target="_blank" rel="noopener">linkedin.com/in/Soowlih-Compaore</a>\ngithub    <a href="' + GITHUB + '" target="_blank" rel="noopener">github.com/SOOWLIHH</a>';
     },
-    theme: function () {
-      setTheme(isDark() ? 'light' : 'dark');
-      return 'Theme switched to ' + (isDark() ? 'dark' : 'light') + '.';
-    },
+    theme: function () { toggleTheme(); return 'Theme switched to ' + (isDark() ? 'dark' : 'light') + '.'; },
     ls: function () { return 'about  experience  projects  now  beyond  skills  education  contact'; },
     pwd: function () { return '/home/soowlih'; }
   };
-  var SECTIONS = { about: 'about', experience: 'experience', projects: 'projects', now: 'now', beyond: 'beyond', hobbies: 'beyond', skills: 'skills', education: 'education', contact: 'contact' };
-
+  var SECTIONS = { about: 'about', experience: 'experience', projects: 'projects', now: 'now', beyond: 'beyond', soccer: 'beyond', skills: 'skills', education: 'education', contact: 'contact' };
   function print(html, cmd) {
-    var div = document.createElement('div');
-    div.className = 'out';
+    var div = el('div', 'out');
     if (cmd !== undefined) {
-      var p = document.createElement('div');
-      p.className = 'cmd';
-      p.innerHTML = '<span class="ok">$</span> ';
-      p.appendChild(document.createTextNode(cmd));
-      div.appendChild(p);
+      var p = el('div', 'cmd'); p.innerHTML = '<span class="ok">$</span> ';
+      p.appendChild(document.createTextNode(cmd)); div.appendChild(p);
     }
-    var o = document.createElement('div');
-    o.innerHTML = html;
-    div.appendChild(o);
-    body.appendChild(div);
-    body.scrollTop = body.scrollHeight;
+    var o = el('div'); o.innerHTML = html; div.appendChild(o);
+    body.appendChild(div); body.scrollTop = body.scrollHeight;
   }
-
   function run(raw) {
-    var cmd = raw.trim();
-    if (!cmd) return;
+    var cmd = raw.trim(); if (!cmd) return;
     history.push(cmd); hIndex = history.length;
-    var lower = cmd.toLowerCase();
-    var parts = lower.split(/\s+/);
-
+    var lower = cmd.toLowerCase(), parts = lower.split(/\s+/);
     if (lower === 'clear') { body.innerHTML = ''; return; }
     if (parts[0] === 'sudo') {
-      if (lower === 'sudo hire soowlih') {
-        print('<span class="ok">[sudo] access granted.</span>\nGreat choice. To finish onboarding, email <span class="hi">' + EMAIL + '</span>', cmd);
-      } else {
-        print('<span class="no">403 Forbidden.</span> Nice try. This backend checks permissions.', cmd);
-      }
+      if (lower === 'sudo hire soowlih') print('<span class="ok">[sudo] access granted.</span>\nGreat choice. To finish onboarding, email <span class="hi">' + EMAIL + '</span>', cmd);
+      else print('<span class="no">403 Forbidden.</span> Nice try. This backend checks permissions.', cmd);
       return;
     }
     if (parts[0] === 'cd') {
@@ -760,32 +1530,115 @@ footer { padding-block: 24px 40px; font-family: var(--font-mono); font-size: 0.7
       else print('cd: no such section. Try <span class="hi">ls</span>.', cmd);
       return;
     }
+    if (parts[0] === 'open') {
+      if (PROJECTS[parts[1]]) { print('<span class="dim">opening ' + parts[1] + '…</span>', cmd); openProject(parts[1]); }
+      else print('open: which one? spendsmart, pawpath, chatbot or houses.', cmd);
+      return;
+    }
     var fn = COMMANDS[parts[0]];
     if (fn) { print(fn(), cmd); return; }
-    var safe = document.createElement('span'); safe.textContent = parts[0];
+    var safe = el('span', null, parts[0]);
     print('<span class="no">command not found:</span> ' + safe.innerHTML + '. Type <span class="hi">help</span>.', cmd);
   }
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    run(input.value);
-    input.value = '';
-  });
+  form.addEventListener('submit', function (e) { e.preventDefault(); run(input.value); input.value = ''; });
   input.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowUp' && history.length) {
-      e.preventDefault(); hIndex = Math.max(0, hIndex - 1); input.value = history[hIndex];
-    } else if (e.key === 'ArrowDown' && history.length) {
-      e.preventDefault(); hIndex = Math.min(history.length, hIndex + 1); input.value = history[hIndex] || '';
-    } else if (e.key === 'Tab') {
-      var v = input.value.trim().toLowerCase();
-      if (!v) return;
-      var names = Object.keys(COMMANDS).concat(['clear', 'cd', 'sudo hire soowlih']);
+    if (e.key === 'ArrowUp' && history.length) { e.preventDefault(); hIndex = Math.max(0, hIndex - 1); input.value = history[hIndex]; }
+    else if (e.key === 'ArrowDown' && history.length) { e.preventDefault(); hIndex = Math.min(history.length, hIndex + 1); input.value = history[hIndex] || ''; }
+    else if (e.key === 'Tab') {
+      var v = input.value.trim().toLowerCase(); if (!v) return;
+      var names = Object.keys(COMMANDS).concat(['clear', 'cd', 'open', 'sudo hire soowlih']);
       var hit = names.filter(function (n) { return n.indexOf(v) === 0; });
-      if (hit.length === 1) { e.preventDefault(); input.value = hit[0] + (hit[0] === 'cd' ? ' ' : ''); }
+      if (hit.length === 1) { e.preventDefault(); input.value = hit[0] + (hit[0] === 'cd' || hit[0] === 'open' ? ' ' : ''); }
     }
   });
   document.querySelectorAll('.term-tips button').forEach(function (b) {
     b.addEventListener('click', function () { run(b.dataset.cmd); });
+  });
+
+  /* ---------- Command palette ---------- */
+  var palette = $('palette'), pIn = $('palette-in'), pList = $('palette-list');
+  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  $('kbd-hint').textContent = isMac ? '⌘K' : 'Ctrl K';
+  var ITEMS = [
+    { g: 'Go to', t: 'About me', k: 'section', run: function () { go('about'); } },
+    { g: 'Go to', t: 'Experience', k: 'section', run: function () { go('experience'); } },
+    { g: 'Go to', t: 'Projects', k: 'section', run: function () { go('projects'); } },
+    { g: 'Go to', t: 'Now', k: 'section', run: function () { go('now'); } },
+    { g: 'Go to', t: 'Soccer & beyond code', k: 'section', run: function () { go('beyond'); } },
+    { g: 'Go to', t: 'Skills', k: 'section', run: function () { go('skills'); } },
+    { g: 'Go to', t: 'Education', k: 'section', run: function () { go('education'); } },
+    { g: 'Go to', t: 'Contact', k: 'section', run: function () { go('contact'); } },
+    { g: 'Projects', t: 'SpendSmart', k: 'open', run: function () { openProject('spendsmart'); } },
+    { g: 'Projects', t: 'PawPath', k: 'open', run: function () { openProject('pawpath'); } },
+    { g: 'Projects', t: 'AI Chatbot Agent API', k: 'open', run: function () { openProject('chatbot'); } },
+    { g: 'Projects', t: 'House Price Prediction', k: 'open', run: function () { openProject('houses'); } },
+    { g: 'Actions', t: 'Copy my email', k: 'copy', run: function () { copyEmail(); } },
+    { g: 'Actions', t: 'Open LinkedIn', k: 'link', href: LINKEDIN },
+    { g: 'Actions', t: 'Open GitHub', k: 'link', href: GITHUB },
+    { g: 'Actions', t: 'Switch light / dark', k: 'theme', run: toggleTheme },
+    { g: 'Actions', t: 'Play keepy-uppy', k: 'game', run: function () { go('beyond'); setTimeout(function () { canvas.focus({ preventScroll: true }); }, 500); } }
+  ];
+  var visible = [], active = 0;
+  function renderPalette() {
+    var q = pIn.value.trim().toLowerCase();
+    visible = ITEMS.filter(function (it) { return !q || (it.t + ' ' + it.g + ' ' + it.k).toLowerCase().indexOf(q) > -1; });
+    active = Math.min(active, Math.max(0, visible.length - 1));
+    pList.innerHTML = '';
+    if (!visible.length) { pList.appendChild(el('li', 'palette-empty', 'Nothing matches "' + pIn.value + '".')); return; }
+    var lastG = null;
+    visible.forEach(function (it, i) {
+      if (it.g !== lastG) { pList.appendChild(el('li', 'grp', it.g)); lastG = it.g; }
+      var li = el('li'); li.setAttribute('role', 'option');
+      var node = it.href ? el('a', 'palette-item') : el('button', 'palette-item');
+      if (it.href) { node.href = it.href; node.target = '_blank'; node.rel = 'noopener'; } else node.type = 'button';
+      node.appendChild(el('span', null, it.t)); node.appendChild(el('span', null, it.href ? '↗' : it.k));
+      if (i === active) { node.classList.add('active'); li.setAttribute('aria-selected', 'true'); }
+      node.addEventListener('mouseenter', function () { active = i; highlight(); });
+      node.addEventListener('click', function (e) { choose(i, e); });
+      li.appendChild(node); pList.appendChild(li);
+    });
+  }
+  function highlight() {
+    var nodes = pList.querySelectorAll('.palette-item');
+    nodes.forEach(function (n, i) { n.classList.toggle('active', i === active); });
+    if (nodes[active]) nodes[active].scrollIntoView({ block: 'nearest' });
+  }
+  function choose(i, e) {
+    var it = visible[i]; if (!it) return;
+    if (it.href) { palette.close(); return; }
+    if (e) e.preventDefault();
+    palette.close();
+    setTimeout(it.run, 30);
+  }
+  function openPalette() {
+    if (modal.open) modal.close();
+    if (hobbyModal.open) hobbyModal.close();
+    pIn.value = ''; active = 0; renderPalette();
+    if (!palette.open) palette.showModal();
+    pIn.focus();
+  }
+  $('palette-btn').addEventListener('click', openPalette);
+  pIn.addEventListener('input', function () { active = 0; renderPalette(); });
+  pIn.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(visible.length - 1, active + 1); highlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); highlight(); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      var it = visible[active];
+      if (it && it.href) { var n = pList.querySelectorAll('.palette-item')[active]; if (n) n.click(); }
+      else choose(active);
+    }
+  });
+  palette.addEventListener('click', function (e) { if (e.target === palette) palette.close(); });
+
+  /* ---------- Global shortcuts ---------- */
+  document.addEventListener('keydown', function (e) {
+    var typing = /INPUT|TEXTAREA/.test((e.target.tagName || '')) || e.target.isContentEditable;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palette.open ? palette.close() : openPalette(); return; }
+    if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === '/' ) { e.preventDefault(); openPalette(); }
+    else if (e.key === '?') { toast('Shortcuts: ' + (isMac ? '⌘K' : 'Ctrl K') + ' or / to search · T to switch theme · ← → between projects'); }
+    else if (e.key.toLowerCase() === 't' && !palette.open && !modal.open && !hobbyModal.open) { toggleTheme(); }
   });
 })();
 </script>
